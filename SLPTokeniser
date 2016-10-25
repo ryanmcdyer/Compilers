@@ -1,0 +1,103 @@
+/*******************************
+***** SECTION 1 - OPTIONS *****
+*******************************/
+options { JAVA_UNICODE_ESCAPE = true; }
+
+PARSER_BEGIN(SLPTokeniser)
+public class SLPTokeniser {
+public static void main(String args[]) {
+SLPTokeniser tokeniser;
+if (args.length == 0) {
+System.out.println("Reading from standard input . . .");
+tokeniser = new SLPTokeniser(System.in);
+} else if (args.length == 1) {
+try {
+tokeniser = new SLPTokeniser(new java.io.FileInputStream(args[0]));
+} catch (java.io.FileNotFoundException e) {
+System.err.println("File " + args[0] + " not found.");
+return;
+} else {
+System.out.println("SLP Tokeniser: Usage is one of:");
+System.out.println(" java SLPTokeniser < inputfile");
+System.out.println("OR");
+System.out.println(" java SLPTokeniser inputfile");
+return;
+}
+/*
+* We’ve now initialised the tokeniser to read from the appropriate place,
+* so just keep reading tokens and printing them until we hit EOF
+*/
+for (Token t = getNextToken(); t.kind!=EOF; t = getNextToken()) {
+// Print out the actual text for the constants, identifiers etc.
+if (t.kind==NUM)
+{
+System.out.print("Number");
+System.out.print("("+t.image+") ");
+}
+else if (t.kind==ID)
+{
+System.out.print("Identifier");
+System.out.print("("+t.image+") ");
+}
+else
+System.out.print(t.image+" ");
+}
+}
+}
+PARSER_END(SLPTokeniser)
+
+/*****************************************
+***** SECTION 3 - TOKEN DEFINITIONS *****
+*****************************************/
+TOKEN_MGR_DECLS :
+{
+static int commentNesting = 0;
+}
+SKIP : /*** Ignoring spaces/tabs/newlines ***/
+{
+" "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+}
+SKIP : /* COMMENTS */
+{
+"/*" { commentNesting++; } : IN_COMMENT
+}
+<IN_COMMENT> SKIP :
+{
+"/*" { commentNesting++; }
+| "*/" { commentNesting--;
+if (commentNesting == 0)
+SwitchTo(DEFAULT);
+}
+| <~[]>
+}
+TOKEN : /* Keywords and punctuation */
+{
+< SEMIC : ";" >
+| < ASSIGN : ":=" >
+| < PRINT : "print" >
+| < LBR : "(" >
+| < RBR : ")" >
+| < COMMA : "," >
+| < PLUS_SIGN : "+" >
+| < MINUS_SIGN : "-" >
+| < MULT_SIGN : "*" >
+| < DIV_SIGN : "/" >
+}
+TOKEN : /* Numbers and identifiers */
+{
+< NUM : (<DIGIT>)+ >
+| < #DIGIT : ["0" - "9"] >
+| < ID : (<LETTER>)+ >
+| < #LETTER : ["a" - "z", "A" - "Z"] >
+}
+TOKEN : /* Anything not recognised so far */
+{
+< OTHER : ~[] >
+}
+/**************************************************************************
+* SECTION 4 - THE GRAMMAR & PRODUCTION RULES - WOULD NORMALLY START HERE *
+**************************************************************************/

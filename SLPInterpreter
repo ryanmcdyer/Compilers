@@ -1,0 +1,173 @@
+options { JAVA_UNICODE_ESCAPE = true; }
+PARSER_BEGIN(SLPInterpreter)
+public class SLPInterpreter {
+public static void main(String args[]) {
+SLPInterpreter interpreter;
+if (args.length == 0) {
+System.out.println("SLP Interpreter: Reading from standard input...");
+interpreter = new SLPInterpreter(System.in);
+} else if (args.length == 1) {
+System.out.println("SLP Interpreter: Reading from file " + args[0] + "...");
+try {
+interpreter = new SLPInterpreter(new java.io.FileInputStream(args[0]));
+} catch (java.io.FileNotFoundException e) {
+System.out.println("SLP Interpreter: File " + args[0] + " not found.");
+return;
+}
+} else {
+System.out.println("SLP Interpreter: Usage is one of:");
+System.out.println(" java SLPInterpreter < inputfile");
+System.out.println("OR");
+System.out.println(" java SLPInterpreter inputfile");
+return;
+}
+try {
+interpreter.Prog();
+} catch (ParseException e) {
+System.out.println(e.getMessage());
+System.out.println("SLP Interpreter: Encountered errors during parse.");
+}
+}
+}
+PARSER_END(SLPInterpreter)
+/*****************************************
+***** SECTION 3 - TOKEN DEFINITIONS *****
+*****************************************/
+TOKEN_MGR_DECLS :
+{
+static int commentNesting = 0;
+}
+SKIP : /*** Ignoring spaces/tabs/newlines ***/
+{
+" "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+}
+SKIP : /* COMMENTS */
+{
+"/*" { commentNesting++; } : IN_COMMENT
+}
+<IN_COMMENT> SKIP :
+{
+"/*" { commentNesting++; }
+| "*/" { commentNesting--;
+if (commentNesting == 0)
+SwitchTo(DEFAULT);
+}
+| <~[]>
+}
+TOKEN : /* Keywords and punctuation */
+{
+< SEMIC : ";" >
+| < ASSIGN : ":=" >
+| < PRINT : "print" >
+| < LBR : "(" >
+| < RBR : ")" >
+| < COMMA : "," >
+| < PLUS_SIGN : "+" >
+| < MINUS_SIGN : "-" >
+| < MULT_SIGN : "*" >
+| < DIV_SIGN : "/" >
+}
+TOKEN : /* Numbers and identifiers */
+{
+< NUM : (<DIGIT>)+ >
+| < #DIGIT : ["0" - "9"] >
+| < ID : (<LETTER>)+ >
+| < #LETTER : ["a" - "z", "A" - "Z"] >
+}
+TOKEN : /* Anything not recognised so far */
+{
+< OTHER : ~[] >
+}
+/***********************************
+***** SECTION 4 - THE GRAMMAR *****
+***********************************/
+void Prog() : {
+  Table t;
+}
+{
+  t=Stm(null) <EOF>
+}
+Table Stm(Table t) :
+{ }
+{
+  (t=SimpleStm(t) [<SEMIC> t=Stm(t)] ) {
+    return t;
+  }
+}
+Table SimpleStm(Table t) : {
+  String id; IntAndTable it; IntListAndTable ilt;
+}
+{
+  (id=Ident() <ASSIGN> it=Exp(t))
+  {
+    if (t == null)
+    return new Table(id,it.i,t);
+    else
+    return t.update(t,id,it.i);
+  }
+    | (<PRINT> <LBR> ilt=ExpList(t) <RBR>)
+  {
+  ilt.il.print();
+  return ilt.t;
+  }
+}
+IntAndTable Exp(Table t) : {
+  IntAndTable arg1, arg2;
+  int oper;
+} {
+  (arg1=SimpleExp(t)
+    [oper=BinOp() arg2=Exp(arg1.t) {
+      switch(oper) {
+        case 1: return new IntAndTable(arg1.i+arg2.i,arg2.t);
+        case 2: return new IntAndTable(arg1.i-arg2.i,arg2.t);
+        case 3: return new IntAndTable(arg1.i*arg2.i,arg2.t);
+        case 4: return new IntAndTable(arg1.i/arg2.i,arg2.t);
+      }
+    }
+  ]
+) {
+  return arg1;
+  }
+}
+IntAndTable SimpleExp(Table t) :
+{IntAndTable it;}
+{
+it=IdExp(t) {return it;}
+| it=NumExp(t) {return it;}
+| (<LBR> t=Stm(t) <COMMA> it=Exp(t) <RBR>) {return it;}
+}
+String Ident() :
+{Token tok;}
+{
+tok=<ID> {return tok.image;}
+}
+IntAndTable IdExp(Table t) :
+{Token tok;}
+{
+tok=<ID> {return new IntAndTable(t.lookup(t,tok.image),t);}
+}
+IntAndTable NumExp(Table t) :
+{Token tok;}
+{
+tok=<NUM> {return new IntAndTable(Integer.parseInt(tok.image),t);}
+}
+IntListAndTable ExpList(Table t) :
+{IntAndTable it;IntListAndTable ilt;}
+{
+(it=Exp(t)
+[<COMMA> ilt=ExpList(it.t)
+{return new IntListAndTable(new IntList(it.i,ilt.il),ilt.t);}
+])
+{return new IntListAndTable(new IntList(it.i,null),it.t);}
+}
+int BinOp() : {}
+{
+<PLUS_SIGN> {return 1;}
+| <MINUS_SIGN> {return 2;}
+| <MULT_SIGN> {return 3;}
+| <DIV_SIGN> {return 4;}
+}

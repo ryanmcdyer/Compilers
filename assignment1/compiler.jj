@@ -1,0 +1,143 @@
+options {
+  JAVA_UNICODE_ESCAPE = true;
+  IGNORE_CASE = true;
+}
+
+PARSER_BEGIN(CCALTokeniser)
+public class CCALTokeniser {
+  public static void main(String args[]) {
+  CCALTokeniser tokeniser;
+  if (args.length == 0) {
+    System.out.println("Reading from standard input . . .");
+    tokeniser = new CCALTokeniser(System.in);
+    } else if (args.length == 1) {
+      try {
+        tokeniser = new CCALTokeniser(new java.io.FileInputStream(args[0]));
+      } catch (java.io.FileNotFoundException e) {
+        System.err.println("File " + args[0] + " not found.");
+        return;
+      }
+    } else {
+      System.out.println("CCAL Tokeniser: Usage is one of:");
+      System.out.println(" java CCALTokeniser < inputfile");
+      System.out.println("OR");
+      System.out.println(" java CCALTokeniser inputfile");
+      return;
+    }
+    /*
+    * We’ve now initialised the tokeniser to read from the appropriate place,
+    * so just keep reading tokens and printing them until we hit EOF
+    */
+    for (Token t = getNextToken(); t.kind!=EOF; t = getNextToken()) {
+      // Print out the actual text for the constants, identifiers etc.
+      if (t.kind==NUM)
+      {
+        System.out.print("Number");
+        System.out.print("("+t.image+") ");
+      }
+        else if (t.kind==ID)
+      {
+        System.out.print("Identifier");
+        System.out.print("("+t.image+") ");
+      }
+      else {
+        System.out.print(t.image+" ");
+      }
+    }
+  }
+}
+PARSER_END(CCALTokeniser)
+
+
+/*****************************************
+***** SECTION 3 - TOKEN DEFINITIONS *****
+*****************************************/
+TOKEN_MGR_DECLS :
+{
+  static int commentNesting = 0;
+}
+SKIP : /*** Ignoring spaces/tabs/newlines ***/
+{
+  " "
+  | "\t"
+  | "\n"
+  | "\r"
+  | "\f"
+}
+
+SKIP : // COMMENTS
+{
+  < "//" (~["\r", "\n"])* >
+}
+SKIP : /* COMMENTS */
+{
+  "/*" { commentNesting++; } : IN_COMMENT
+}
+<IN_COMMENT> SKIP :
+{
+  "/*" { commentNesting++; }
+  | "*/" { commentNesting--;
+    if (commentNesting == 0)
+    SwitchTo(DEFAULT);
+  }
+  | <~[]>
+}
+
+TOKEN : /* Reserved words */
+{
+  < VAR : "var" >
+  | < CONST : "const" >
+  | < RETURN : "return" >
+  | < INTEGER : "integer" >
+  | < BOOLEAN : "boolean" >
+  | < VOID : "void" >
+  | < MAIN : "main" >
+  | < IF : "if" >
+  | < ELSE : "else" >
+  | < WHILE : "while" >
+  | < SKIP : "skip" >
+}
+TOKEN : /* Other reserved tokens*/
+{
+  < COMMA : "," >
+  | < SEMICOLON : ";" >
+  | < COLON : ":" >
+  | < LEFTBRACE : "{" >
+  | < RIGHTBRACE : "}" >
+  | < LEFTPAREN : "(" >
+  | < RIGHTPAREN : ")" >
+}
+TOKEN : /* Reserved tokens */
+{
+  < ASSIGN : "=" >
+  | < PLUS_SIGN : "+" >
+  | < MINUS_SIGN : "-" >
+  | < NEGATION : "~" >
+  | < OR : "||" >
+  | < AND : "&&" >
+  | < EQUALTO : "==" >
+  | < NOTEQUALTO : "!=" >
+  | < LESSTHAN : "<" >
+  | < LESSTHANEQUALS : "<=" >
+  | < GREATERTHAN : ">" >
+  | < GREATERTHANEQUALS : ">=" >
+}
+TOKEN : /* Numbers and identifiers */
+{
+  // ( ["-" 1-9][0-9]* )
+  < NUM : (<DIGIT>)+ >
+  | < #DIGIT : ["0" - "9"] >
+  | < ID : (<LETTER>)+ >
+  | < #LETTER : ["a" - "z", "A" - "Z"] >
+}
+TOKEN : /* Anything not recognised so far */
+{
+< OTHER : ~[] >
+}
+/***********************************
+***** SECTION 4 - THE GRAMMAR *****
+***********************************/
+void program() : {}
+{
+Stm() <EOF>
+}

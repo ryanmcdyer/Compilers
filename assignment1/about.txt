@@ -1,0 +1,19 @@
+The reserved words in the language are:
+var, const, return, integer, boolean, void, main, if, else, while, skip
+
+The following are tokens in the language:
+, ; : = { } ( ) + - ∼ || && == != < <= > >=
+
+Integers are represented by a string of one or more digits (‘0’-‘9’) that
+do not start with the digit ‘0’, but may start with a minus sign (‘-’), e.g.
+123, -456.
+
+Identifiers are represented by a string of letters, digits or underscore
+character (‘ ’) beginning with a letter. Identifiers cannot be reserved words.
+
+Comments can appear between any two tokens. There are two forms of comment:
+one is delimited by /* and */ and can be nested;
+the other begins with // and is delimited by the end of line and this type of comments may not be nested.
+
+DONE: reserved words, tokens, operations, comments
+TODO: Fix numbers and IDs
