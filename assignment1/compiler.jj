@@ -6,10 +6,10 @@ options {
 PARSER_BEGIN(CCALTokeniser)
 public class CCALTokeniser {
   public static void main(String args[]) {
-  CCALTokeniser tokeniser;
-  if (args.length == 0) {
-    System.out.println("Reading from standard input . . .");
-    tokeniser = new CCALTokeniser(System.in);
+    CCALTokeniser tokeniser;
+    if (args.length == 0) {
+      System.out.println("Reading from standard input . . .");
+      tokeniser = new CCALTokeniser(System.in);
     } else if (args.length == 1) {
       try {
         tokeniser = new CCALTokeniser(new java.io.FileInputStream(args[0]));
@@ -125,19 +125,23 @@ TOKEN : /* Reserved tokens */
 TOKEN : /* Numbers and identifiers */
 {
   // ( ["-" 1-9][0-9]* )
-  < NUM : (<DIGIT>)+ >
+  < NUM : ("-", ["1"-"9"])(<DIGIT>)+ >
   | < #DIGIT : ["0" - "9"] >
-  | < ID : (<LETTER>)+ >
+  | < ID : (<LETTER>)(<LETTER> | "_" | <DIGIT>)+ >
   | < #LETTER : ["a" - "z", "A" - "Z"] >
+
+
+  Identifiers are represented by a string of letters, digits or underscore
+  character (‘ ’) beginning with a letter. Identifiers cannot be reserved words.
 }
 TOKEN : /* Anything not recognised so far */
 {
-< OTHER : ~[] >
+  < OTHER : ~[] >
 }
 /***********************************
 ***** SECTION 4 - THE GRAMMAR *****
 ***********************************/
 void program() : {}
 {
-Stm() <EOF>
+  <decl_list> <function_list> <main>
 }
