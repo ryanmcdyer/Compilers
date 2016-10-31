@@ -3,29 +3,29 @@ options {
   IGNORE_CASE = true;
 }
 
-PARSER_BEGIN(CCALTokeniser)
-public class CCALTokeniser {
+PARSER_BEGIN(CCALInterpreter)
+public class CCALInterpreter {
   public static void main(String args[]) {
-    CCALTokeniser tokeniser;
+    CCALInterpreter interpreter;
     if (args.length == 0) {
       System.out.println("Reading from standard input . . .");
-      tokeniser = new CCALTokeniser(System.in);
+      interpreter = new CCALInterpreter(System.in);
     } else if (args.length == 1) {
       try {
-        tokeniser = new CCALTokeniser(new java.io.FileInputStream(args[0]));
+        interpreter = new CCALInterpreter(new java.io.FileInputStream(args[0]));
       } catch (java.io.FileNotFoundException e) {
         System.err.println("File " + args[0] + " not found.");
         return;
       }
     } else {
-      System.out.println("CCAL Tokeniser: Usage is one of:");
-      System.out.println(" java CCALTokeniser < inputfile");
+      System.out.println("CCAL Interpreter: Usage is one of:");
+      System.out.println(" java CCALInterpreter < inputfile");
       System.out.println("OR");
-      System.out.println(" java CCALTokeniser inputfile");
+      System.out.println(" java CCALInterpreter inputfile");
       return;
     }
     /*
-    * We’ve now initialised the tokeniser to read from the appropriate place,
+    * We’ve now initialised the interpreter to read from the appropriate place,
     * so just keep reading tokens and printing them until we hit EOF
     */
     for (Token t = getNextToken(); t.kind!=EOF; t = getNextToken()) {
@@ -46,7 +46,7 @@ public class CCALTokeniser {
     }
   }
 }
-PARSER_END(CCALTokeniser)
+PARSER_END(CCALInterpreter)
 
 
 /*****************************************
@@ -64,7 +64,6 @@ SKIP : /*** Ignoring spaces/tabs/newlines ***/
   | "\r"
   | "\f"
 }
-
 SKIP : // COMMENTS
 {
   < "//" (~["\r", "\n"])* >
@@ -95,7 +94,6 @@ TOKEN : /* Reserved words */
   | < IF : "if" >
   | < ELSE : "else" >
   | < WHILE : "while" >
-  | < SKIP : "skip" >
 }
 TOKEN : /* Other reserved tokens*/
 {
@@ -124,15 +122,12 @@ TOKEN : /* Reserved tokens */
 }
 TOKEN : /* Numbers and identifiers */
 {
-  // ( ["-" 1-9][0-9]* )
-  < NUM : ("-", ["1"-"9"])(<DIGIT>)+ >
+  < NUM : <NONZERO> (<DIGIT>)*
+    | <MINUS_SIGN> <NONZERO> (<DIGIT>)* >
   | < #DIGIT : ["0" - "9"] >
+  | < #NONZERO : ["1" - "9"] >
   | < ID : (<LETTER>)(<LETTER> | "_" | <DIGIT>)+ >
   | < #LETTER : ["a" - "z", "A" - "Z"] >
-
-
-  Identifiers are represented by a string of letters, digits or underscore
-  character (‘ ’) beginning with a letter. Identifiers cannot be reserved words.
 }
 TOKEN : /* Anything not recognised so far */
 {
@@ -141,7 +136,7 @@ TOKEN : /* Anything not recognised so far */
 /***********************************
 ***** SECTION 4 - THE GRAMMAR *****
 ***********************************/
-void program() : {}
+/*void program() : {}
 {
   <decl_list> <function_list> <main>
-}
+}*/

@@ -16,4 +16,4 @@ one is delimited by /* and */ and can be nested;
 the other begins with // and is delimited by the end of line and this type of comments may not be nested.
 
 DONE: reserved words, tokens, operations, comments
-TODO: Fix numbers and IDs
+DONE: Fix numbers and IDs
