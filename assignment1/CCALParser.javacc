@@ -136,67 +136,15 @@ TOKEN : /* Anything not recognised so far */
 /***********************************
 ***** SECTION 4 - THE GRAMMAR *****
 ***********************************/
-/*void program() : {}
+void program() :
 {
   <decl_list> <function_list> <main>
-}*/
-
-/*
-void Prog() : {}
-{
-  Stm() <EOF>
 }
 
-void Stm() : {}
+void decl_list() :
 {
-  (SimpleStm() [<SEMIC> Stm()] )
+  <decl> decl_list()
+  | null
 }
 
-void SimpleStm() :
-{}
-{
-  (Ident() <ASSIGN> Exp())
-| (<PRINT> <LBR> ExpList() <RBR>)
-}
-
-void Exp() : {}
-{
-  (SimpleExp() [BinOp() Exp()]  )
-}
-
-void SimpleExp() : {}
-{
-  IdExp()
-| NumExp()
-| (<LBR> Stm() <COMMA> Exp() <RBR>)
-}
-
-void Ident() : {}
-{
-  <ID>
-}
-
-void IdExp() : {}
-{
-  <ID>
-}
-
-void NumExp() : {}
-{
-  <NUM>
-}
-
-void ExpList() : {}
-{
-  (Exp() [<COMMA> ExpList()] )
-}
-
-
-void BinOp() : {}
-{
-  <PLUS_SIGN>
-| <MINUS_SIGN>
-| <MULT_SIGN>
-| <DIV_SIGN>
-}
-*/
+<decl_list> |= (<decl> ; <decl_list> | E)

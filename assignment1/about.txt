@@ -1,3 +1,5 @@
+//TODO: Add David's changes to the spec (eg true/false)
+
 The reserved words in the language are:
 var, const, return, integer, boolean, void, main, if, else, while, skip
 
