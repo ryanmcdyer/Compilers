@@ -3,29 +3,29 @@ options {
   IGNORE_CASE = true;
 }
 
-PARSER_BEGIN(CCALInterpreter)
-public class CCALInterpreter {
+PARSER_BEGIN(CCALParser)
+public class CCALParser {
   public static void main(String args[]) {
-    CCALInterpreter interpreter;
+    CCALParser parser;
     if (args.length == 0) {
       System.out.println("Reading from standard input . . .");
-      interpreter = new CCALInterpreter(System.in);
+      parser = new CCALParser(System.in);
     } else if (args.length == 1) {
       try {
-        interpreter = new CCALInterpreter(new java.io.FileInputStream(args[0]));
+        parser = new CCALParser(new java.io.FileInputStream(args[0]));
       } catch (java.io.FileNotFoundException e) {
         System.err.println("File " + args[0] + " not found.");
         return;
       }
     } else {
-      System.out.println("CCAL Interpreter: Usage is one of:");
-      System.out.println(" java CCALInterpreter < inputfile");
+      System.out.println("CCAL Parser: Usage is one of:");
+      System.out.println(" java CCALParser < inputfile");
       System.out.println("OR");
-      System.out.println(" java CCALInterpreter inputfile");
+      System.out.println(" java CCALParser inputfile");
       return;
     }
     /*
-    * We’ve now initialised the interpreter to read from the appropriate place,
+    * We’ve now initialised the parser to read from the appropriate place,
     * so just keep reading tokens and printing them until we hit EOF
     */
     for (Token t = getNextToken(); t.kind!=EOF; t = getNextToken()) {
@@ -46,7 +46,7 @@ public class CCALInterpreter {
     }
   }
 }
-PARSER_END(CCALInterpreter)
+PARSER_END(CCALParser)
 
 
 /*****************************************
@@ -140,3 +140,63 @@ TOKEN : /* Anything not recognised so far */
 {
   <decl_list> <function_list> <main>
 }*/
+
+/*
+void Prog() : {}
+{
+  Stm() <EOF>
+}
+
+void Stm() : {}
+{
+  (SimpleStm() [<SEMIC> Stm()] )
+}
+
+void SimpleStm() :
+{}
+{
+  (Ident() <ASSIGN> Exp())
+| (<PRINT> <LBR> ExpList() <RBR>)
+}
+
+void Exp() : {}
+{
+  (SimpleExp() [BinOp() Exp()]  )
+}
+
+void SimpleExp() : {}
+{
+  IdExp()
+| NumExp()
+| (<LBR> Stm() <COMMA> Exp() <RBR>)
+}
+
+void Ident() : {}
+{
+  <ID>
+}
+
+void IdExp() : {}
+{
+  <ID>
+}
+
+void NumExp() : {}
+{
+  <NUM>
+}
+
+void ExpList() : {}
+{
+  (Exp() [<COMMA> ExpList()] )
+}
+
+
+void BinOp() : {}
+{
+  <PLUS_SIGN>
+| <MINUS_SIGN>
+| <MULT_SIGN>
+| <DIV_SIGN>
+}
+*/
