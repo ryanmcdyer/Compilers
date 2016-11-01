@@ -17,7 +17,6 @@ Comments can appear between any two tokens. There are two forms of comment:
 one is delimited by /* and */ and can be nested;
 the other begins with // and is delimited by the end of line and this type of comments may not be nested.
 
-
 (1)
 <program> |= <decl_list> <function_list> <main>
 
