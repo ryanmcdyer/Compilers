@@ -144,7 +144,7 @@ void program() :
 void decl_list() :
 {
   <decl> decl_list()
-  | null
+  | {}
 }
 
 <decl_list> |= (<decl> ; <decl_list> | E)
