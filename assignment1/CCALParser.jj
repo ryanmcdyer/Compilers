@@ -24,26 +24,15 @@ public class CCALParser {
       System.out.println(" java CCALParser inputfile");
       return;
     }
-    /*
-    * We’ve now initialised the parser to read from the appropriate place,
-    * so just keep reading tokens and printing them until we hit EOF
-    */
-    for (Token t = getNextToken(); t.kind!=EOF; t = getNextToken()) {
-      // Print out the actual text for the constants, identifiers etc.
-      if (t.kind==NUM)
-      {
-        System.out.print("Number");
-        System.out.print("("+t.image+") ");
-      }
-        else if (t.kind==ID)
-      {
-        System.out.print("Identifier");
-        System.out.print("("+t.image+") ");
-      }
-      else {
-        System.out.print(t.image+" ");
-      }
+    try {
+      parser.program();
+      System.out.println("CCAL Parser: CCAL program parsed successfully.");
     }
+    catch (ParseException e)
+    {
+      System.out.println(e.getMessage());
+      System.out.println("CCAL Parser:  Encountered errors during parse.");
+     }
   }
 }
 PARSER_END(CCALParser)
@@ -81,6 +70,10 @@ SKIP : /* COMMENTS */
   }
   | <~[]>
 }
+SKIP : //The string "SKIP"
+{
+  "SKIP"
+}
 
 TOKEN : /* Reserved words */
 {
@@ -93,17 +86,20 @@ TOKEN : /* Reserved words */
   | < MAIN : "main" >
   | < IF : "if" >
   | < ELSE : "else" >
+  | < TRUE : "true" >
+  | < FALSE : "false" >
   | < WHILE : "while" >
+  | < SKIP_STRING : "skip" >
 }
 TOKEN : /* Other reserved tokens*/
 {
   < COMMA : "," >
-  | < SEMICOLON : ";" >
+  | < SEMIC : ";" >
   | < COLON : ":" >
-  | < LEFTBRACE : "{" >
-  | < RIGHTBRACE : "}" >
-  | < LEFTPAREN : "(" >
-  | < RIGHTPAREN : ")" >
+  | < LBRACE : "{" >
+  | < RBRACE : "}" >
+  | < LPAREN : "(" >
+  | < RPAREN : ")" >
 }
 TOKEN : /* Reserved tokens */
 {
@@ -122,7 +118,7 @@ TOKEN : /* Reserved tokens */
 }
 TOKEN : /* Numbers and identifiers */
 {
-  < NUM : <NONZERO> (<DIGIT>)*
+  < NUMBER : <NONZERO> (<DIGIT>)*
     | <MINUS_SIGN> <NONZERO> (<DIGIT>)* >
   | < #DIGIT : ["0" - "9"] >
   | < #NONZERO : ["1" - "9"] >
@@ -136,15 +132,151 @@ TOKEN : /* Anything not recognised so far */
 /***********************************
 ***** SECTION 4 - THE GRAMMAR *****
 ***********************************/
-void program() :
+void program() : {}//(1)
 {
-  <decl_list> <function_list> <main>
+  decl_list() function_list() main()
 }
 
-void decl_list() :
+void decl_list() : {}//(2)
 {
-  <decl> decl_list()
-  | {}
+  decl() decl_list()
 }
 
-<decl_list> |= (<decl> ; <decl_list> | E)
+void decl() : {}//(3)
+{
+  var_decl()
+  | const_decl()
+}
+
+void var_decl() : {}//(4)
+{
+  <VAR> <ID> <COLON> type()
+}
+
+void const_decl() : {}//(5)
+{
+  <CONST> <ID> type() <ASSIGN> expression()
+}
+
+void function_list() : {}//(6)
+{
+  (function() function_list())
+}
+
+void function() : {}//(7)
+{
+  type() <ID> <LPAREN> parameter_list() <RPAREN>
+  <LBRACE>
+    decl_list() statement_block() <RETURN> <LPAREN> (expression()) <RPAREN> <SEMIC>
+  <RBRACE>
+}
+
+void type() : {}//(8)
+{
+  <INTEGER>
+  | <BOOLEAN>
+  | <VOID>
+}
+
+void parameter_list() : {}//(9)
+{
+  (nemp_parameter_list())
+}
+
+void nemp_parameter_list() : {}//(10)
+{
+  <ID> <COLON> type()
+  | <ID> <COLON> type() <COMMA> nemp_parameter_list()
+}
+
+void main() : {}//(11)
+{
+  <MAIN> <LBRACE>
+    decl_list()
+    statement_block()
+  <RBRACE>
+}
+
+void statement_block() : {}//(12)
+{
+  (statement() statement_block())
+}
+
+void statement() : {}//(13)
+{
+  <ID> <ASSIGN> expression() <SEMIC>
+  | <ID> <LPAREN> arg_list() <RPAREN> <SEMIC>
+  | <LBRACE> statement_block() <RBRACE>
+  | <IF> condition()
+    <LBRACE> statement_block() <RBRACE>
+    <ELSE>
+    <LBRACE> statement_block() <RBRACE>
+  | <WHILE> condition()
+    <LBRACE> statement_block() <RBRACE>
+  | <SKIP_STRING> <SEMIC>
+}
+
+void expression() : {}//(14)
+{
+  fragment() binary_arith_op() fragment()
+  | <LPAREN> expression() <RPAREN>
+  | <ID> <LPAREN> arg_list() <RPAREN>
+  | <ID>
+  <NUMBER>
+}
+/*
+void expression_in_parens() : {}//(14a)
+{
+  <LPAREN> expression() <RPAREN>
+}*/
+
+void binary_arith_op() : {}//(15)
+{
+  <PLUS_SIGN>
+  | <MINUS_SIGN>
+}
+
+void fragment() : {}//(16)
+{
+  <ID>
+  | <MINUS_SIGN> <ID>
+  | <NUMBER>
+  | <TRUE>
+  | <FALSE>
+  | expression()
+}
+
+void condition() : {}//(17)
+{
+  <NEGATION> condition()
+  | <LPAREN> condition() <RPAREN>
+  | expression() comp_op() expression()
+  | condition() <LPAREN> binary_logical_op() <RPAREN> condition()
+}
+
+void binary_logical_op() : {}//(A)
+{
+  <OR>
+  | <AND>
+}
+
+void comp_op() : {}//(18)
+{
+  <EQUALTO>
+  | <NOTEQUALTO>
+  | <LESSTHAN>
+  | <LESSTHANEQUALS>
+  | <GREATERTHAN>
+  | <GREATERTHANEQUALS>
+}
+
+void arg_list() : {}//(19)
+{
+  (nemp_arg_list())
+}
+
+void nemp_arg_list() : {}//(20)
+{
+  <ID>
+  | <ID> <COMMA> nemp_arg_list()
+}

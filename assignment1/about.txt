@@ -1,7 +1,7 @@
 //TODO: Add David's changes to the spec (eg true/false)
 
 The reserved words in the language are:
-var, const, return, integer, boolean, void, main, if, else, while, skip
+var, const, return, integer, boolean, void, main, if, else, true, false, while, skip
 
 The following are tokens in the language:
 , ; : = { } ( ) + - ∼ || && == != < <= > >=
@@ -33,7 +33,7 @@ the other begins with // and is delimited by the end of line and this type of co
 <const_decl> |= const identifier:<type> = <expression>
 
 (6)
-<function_list> |= (<function> <function_list> | )
+<function_list> |= (<function> <function_list> | E)
 
 (7)
 <function> |= <type> identifier (<parameter_list>)
@@ -63,7 +63,7 @@ return ( <expression> | E) ;
 
 (13)
 <statement> |= identifier = <expression> ; |
-identifier ( <arg list> ) ; |
+identifier ( <arg_list> ) ; |
 { <statement_block> } |
 if <condition> { <statement_block> } else {<statement_block> } |
 while <condition> { <statement_block> } |
@@ -72,7 +72,7 @@ skip ;
 (14)
 <expression> |= <fragment> <binary_arith_op> <fragment> |
 ( <expression> ) |
-identifier (<arg list> ) |
+identifier (<arg_list> ) |
 identifier |
 number
 
@@ -80,19 +80,19 @@ number
 <binary_arith_op> |= + | -
 
 (16)
-<fragment> |= identifier | number | true | false | <expression>
+<fragment> |= identifier | - identifier | number | true | false | <expression>
 
 (17)
 <condition> |= ∼ <condition> |
 ( <condition> ) |
-<expression> <comp op> <expression> |
+<expression> <comp_op> <expression> |
 <condition>( || | && )<condition>
 
 (18)
-<comp op> |= == | != | < | <= | > | >=
+<comp_op> |= == | != | < | <= | > | >=
 
 (19)
-<arg list> |= <nemp_arg_list> | E
+<arg_list> |= <nemp_arg_list> | E
 
 (20)
 <nemp_arg_list> |= identifier | identifier , <nemp_arg_list>
