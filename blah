@@ -1,0 +1,24 @@
+<expr> ::= <expr> + <term>
+        |  <expr> - <term>
+        |  <term>
+
+<expr> ::= <term> <expr'>
+<expr'> ::= + <term> <expr'>
+        | - <term> <expr'>
+        | E
+
+
+<condition> ::= <NEGATION> condition()
+              | <LPAREN> condition() <RPAREN>
+              | expression() comp_op() expression()
+              | condition() <LPAREN> binary_logical_op() <RPAREN> condition()
+
+
+<condition> ::= <abcd> <condition'>
+
+<condition'> ::= <NEGATION>
+
+condition() : {}
+{
+  condition() (<LPAREN> binary_logical_op() <RPAREN> condition())
+}

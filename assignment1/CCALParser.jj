@@ -185,8 +185,7 @@ void parameter_list() : {}//(9)
 
 void nemp_parameter_list() : {}//(10)
 {
-  <ID> <COLON> type()
-  | <ID> <COLON> type() <COMMA> nemp_parameter_list()
+  <ID> <COLON> type() [<COMMA> nemp_parameter_list()]
 }
 
 void main() : {}//(11)
@@ -216,19 +215,15 @@ void statement() : {}//(13)
   | <SKIP_STRING> <SEMIC>
 }
 
+//[binary_arith_op() fragment()]
 void expression() : {}//(14)
 {
   fragment() binary_arith_op() fragment()
-  | <LPAREN> expression() <RPAREN>
-  | <ID> <LPAREN> arg_list() <RPAREN>
-  | <ID>
-  <NUMBER>
+  | <LPAREN> expression() <RPAREN> (binary_arith_op() fragment())
+  | <ID> <LPAREN> arg_list() <RPAREN> (binary_arith_op() fragment())
+  | <ID> (binary_arith_op() fragment())
+  <NUMBER> (binary_arith_op() fragment())
 }
-/*
-void expression_in_parens() : {}//(14a)
-{
-  <LPAREN> expression() <RPAREN>
-}*/
 
 void binary_arith_op() : {}//(15)
 {
@@ -243,15 +238,14 @@ void fragment() : {}//(16)
   | <NUMBER>
   | <TRUE>
   | <FALSE>
-  | expression()
 }
 
 void condition() : {}//(17)
 {
-  <NEGATION> condition()
-  | <LPAREN> condition() <RPAREN>
-  | expression() comp_op() expression()
-  | condition() <LPAREN> binary_logical_op() <RPAREN> condition()
+  <NEGATION> condition() (<LPAREN> binary_logical_op() <RPAREN> condition())
+  | <LPAREN> condition() <RPAREN> (<LPAREN> binary_logical_op() <RPAREN> condition())
+  | expression() comp_op() expression() (<LPAREN> binary_logical_op() <RPAREN> condition())
+  //| condition() <LPAREN> binary_logical_op() <RPAREN> condition()
 }
 
 void binary_logical_op() : {}//(A)
@@ -277,6 +271,5 @@ void arg_list() : {}//(19)
 
 void nemp_arg_list() : {}//(20)
 {
-  <ID>
-  | <ID> <COMMA> nemp_arg_list()
+  <ID> [<COMMA> nemp_arg_list()]
 }
