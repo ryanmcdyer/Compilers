@@ -1,3 +1,6 @@
+//TODO: Double check ints/ID definitions
+
+
 The reserved words in the language are:
 var, const, return, integer, boolean, void, main, if, else, true, false, while, skip
 
@@ -71,8 +74,7 @@ skip ;
 <expression> |= <fragment> <binary_arith_op> <fragment> |
 ( <expression> ) |
 identifier (<arg_list> ) |
-identifier |
-number
+identifier 
 
 (15)
 <binary_arith_op> |= + | -

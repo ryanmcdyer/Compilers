@@ -201,10 +201,11 @@ void statement_block() : {}//(12)
   (statement() statement_block())
 }
 
+/*<ID> <ASSIGN> expression() <SEMIC>
+| <ID> <LPAREN> arg_list() <RPAREN> <SEMIC>*/
 void statement() : {}//(13)
 {
-  <ID> <ASSIGN> expression() <SEMIC>
-  | <ID> <LPAREN> arg_list() <RPAREN> <SEMIC>
+  <ID> statement2()
   | <LBRACE> statement_block() <RBRACE>
   | <IF> condition()
     <LBRACE> statement_block() <RBRACE>
@@ -215,7 +216,12 @@ void statement() : {}//(13)
   | <SKIP_STRING> <SEMIC>
 }
 
-//[binary_arith_op() fragment()]
+void statement2() : {}//(13a)
+{
+  <ASSIGN> expression() <SEMIC>
+  | <LPAREN> arg_list() <RPAREN> <SEMIC>
+}
+/*
 void expression() : {}//(14)
 {
   fragment() binary_arith_op() fragment()
@@ -223,6 +229,24 @@ void expression() : {}//(14)
   | <ID> <LPAREN> arg_list() <RPAREN> (binary_arith_op() fragment())
   | <ID> (binary_arith_op() fragment())
   <NUMBER> (binary_arith_op() fragment())
+}*/
+
+void expression() : {}//(14)
+{
+  fragment() binary_arith_op() fragment()
+  | <LPAREN> expression() <RPAREN> [binary_arith_op() fragment()]
+  | <ID> [binary_arith_op() fragment()]
+  | <ID> <LPAREN> arg_list() <RPAREN> [binary_arith_op() fragment()]
+}
+
+void expression2() : {}//(14a)
+{
+  <LPAREN> arg_list() <RPAREN> [binary_arith_op() fragment()]
+}
+
+void expression3() : {}//(14b)
+{
+  [binary_arith_op() fragment()]
 }
 
 void binary_arith_op() : {}//(15)
@@ -245,10 +269,9 @@ void condition() : {}//(17)
   <NEGATION> condition() (<LPAREN> binary_logical_op() <RPAREN> condition())
   | <LPAREN> condition() <RPAREN> (<LPAREN> binary_logical_op() <RPAREN> condition())
   | expression() comp_op() expression() (<LPAREN> binary_logical_op() <RPAREN> condition())
-  //| condition() <LPAREN> binary_logical_op() <RPAREN> condition()
 }
 
-void binary_logical_op() : {}//(A)
+void binary_logical_op() : {}//(17a)
 {
   <OR>
   | <AND>
