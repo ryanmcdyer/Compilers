@@ -1,3 +1,6 @@
+//Ryan McDyer
+//13431038
+
 options {
   JAVA_UNICODE_ESCAPE = true;
   IGNORE_CASE = true;
@@ -39,13 +42,13 @@ PARSER_END(CCALParser)
 
 
 /*****************************************
-***** SECTION 3 - TOKEN DEFINITIONS *****
+************ TOKEN DEFINITIONS ***********
 *****************************************/
 TOKEN_MGR_DECLS :
 {
   static int commentNesting = 0;
 }
-SKIP : /*** Ignoring spaces/tabs/newlines ***/
+SKIP : /*** Ignoring whitespaces ***/
 {
   " "
   | "\t"
@@ -53,29 +56,29 @@ SKIP : /*** Ignoring spaces/tabs/newlines ***/
   | "\r"
   | "\f"
 }
-SKIP : // COMMENTS
+SKIP : // COMMENTS, taken from lth.se
 {
-  < "//" (~["\r", "\n"])* >
+  < "//" (~["\n","\r"])* ("\n" | "\r" | "\r\n") >
 }
 SKIP : /* COMMENTS */
 {
-  "/*" { commentNesting++; } : IN_COMMENT
+  <"/*"> { commentNesting++; } : IN_COMMENT
 }
 <IN_COMMENT> SKIP :
 {
-  "/*" { commentNesting++; }
-  | "*/" { commentNesting--;
+  <"/*"> { commentNesting++; }
+  | <"*/"> { commentNesting--;
     if (commentNesting == 0)
-    SwitchTo(DEFAULT);
+      SwitchTo(DEFAULT);
   }
   | <~[]>
 }
-SKIP : //The string "SKIP"
+<DEFAULT> SKIP : //The string "SKIP"
 {
-  "SKIP"
+  <SKIP_STRING>
 }
 
-TOKEN : /* Reserved words */
+TOKEN : /* Keywords */
 {
   < VAR : "var" >
   | < CONST : "const" >
@@ -101,7 +104,7 @@ TOKEN : /* Other reserved tokens*/
   | < LPAREN : "(" >
   | < RPAREN : ")" >
 }
-TOKEN : /* Reserved tokens */
+TOKEN : /* Operators */
 {
   < ASSIGN : "=" >
   | < PLUS_SIGN : "+" >
@@ -118,11 +121,13 @@ TOKEN : /* Reserved tokens */
 }
 TOKEN : /* Numbers and identifiers */
 {
-  < NUMBER : <NONZERO> (<DIGIT>)*
+  < NUMBER : <DIGIT>
+    | <NONZERO> (<DIGIT>)*
+    | <MINUS_SIGN> <DIGIT>
     | <MINUS_SIGN> <NONZERO> (<DIGIT>)* >
   | < #DIGIT : ["0" - "9"] >
   | < #NONZERO : ["1" - "9"] >
-  | < ID : (<LETTER>)(<LETTER> | "_" | <DIGIT>)+ >
+  | < ID : (<LETTER>)(<LETTER> | "_" | <DIGIT>)* >
   | < #LETTER : ["a" - "z", "A" - "Z"] >
 }
 TOKEN : /* Anything not recognised so far */
@@ -130,7 +135,7 @@ TOKEN : /* Anything not recognised so far */
   < OTHER : ~[] >
 }
 /***********************************
-***** SECTION 4 - THE GRAMMAR *****
+************ THE GRAMMAR ***********
 ***********************************/
 void program() : {}//(1)
 {
@@ -139,35 +144,36 @@ void program() : {}//(1)
 
 void decl_list() : {}//(2)
 {
-  decl() decl_list()
+  (decl())*
 }
 
 void decl() : {}//(3)
 {
-  var_decl()
-  | const_decl()
+  (var_decl() | const_decl()) <SEMIC>
 }
 
 void var_decl() : {}//(4)
 {
-  <VAR> <ID> <COLON> type()
+  <VAR> <ID><COLON>type()
 }
 
 void const_decl() : {}//(5)
 {
-  <CONST> <ID> type() <ASSIGN> expression()
+  <CONST> <ID><COLON>type() <ASSIGN> expression()
 }
 
 void function_list() : {}//(6)
 {
-  (function() function_list())
+  (function())*
 }
 
 void function() : {}//(7)
 {
   type() <ID> <LPAREN> parameter_list() <RPAREN>
   <LBRACE>
-    decl_list() statement_block() <RETURN> <LPAREN> (expression()) <RPAREN> <SEMIC>
+    decl_list()
+    statement_block()
+    <RETURN> <LPAREN> [expression()] <RPAREN> <SEMIC>
   <RBRACE>
 }
 
@@ -180,12 +186,12 @@ void type() : {}//(8)
 
 void parameter_list() : {}//(9)
 {
-  (nemp_parameter_list())
+  [nemp_parameter_list()]
 }
 
 void nemp_parameter_list() : {}//(10)
 {
-  <ID> <COLON> type() [<COMMA> nemp_parameter_list()]
+  <ID><COLON>type() [<COMMA> nemp_parameter_list()]
 }
 
 void main() : {}//(11)
@@ -198,11 +204,9 @@ void main() : {}//(11)
 
 void statement_block() : {}//(12)
 {
-  (statement() statement_block())
+  [statement() statement_block()]
 }
 
-/*<ID> <ASSIGN> expression() <SEMIC>
-| <ID> <LPAREN> arg_list() <RPAREN> <SEMIC>*/
 void statement() : {}//(13)
 {
   <ID> statement2()
@@ -221,32 +225,13 @@ void statement2() : {}//(13a)
   <ASSIGN> expression() <SEMIC>
   | <LPAREN> arg_list() <RPAREN> <SEMIC>
 }
-/*
-void expression() : {}//(14)
-{
-  fragment() binary_arith_op() fragment()
-  | <LPAREN> expression() <RPAREN> (binary_arith_op() fragment())
-  | <ID> <LPAREN> arg_list() <RPAREN> (binary_arith_op() fragment())
-  | <ID> (binary_arith_op() fragment())
-  <NUMBER> (binary_arith_op() fragment())
-}*/
 
 void expression() : {}//(14)
 {
-  fragment() binary_arith_op() fragment()
+  LOOKAHEAD(2)
+    fragment() [binary_arith_op() fragment()]
   | <LPAREN> expression() <RPAREN> [binary_arith_op() fragment()]
-  | <ID> [binary_arith_op() fragment()]
   | <ID> <LPAREN> arg_list() <RPAREN> [binary_arith_op() fragment()]
-}
-
-void expression2() : {}//(14a)
-{
-  <LPAREN> arg_list() <RPAREN> [binary_arith_op() fragment()]
-}
-
-void expression3() : {}//(14b)
-{
-  [binary_arith_op() fragment()]
 }
 
 void binary_arith_op() : {}//(15)
@@ -266,9 +251,22 @@ void fragment() : {}//(16)
 
 void condition() : {}//(17)
 {
-  <NEGATION> condition() (<LPAREN> binary_logical_op() <RPAREN> condition())
-  | <LPAREN> condition() <RPAREN> (<LPAREN> binary_logical_op() <RPAREN> condition())
-  | expression() comp_op() expression() (<LPAREN> binary_logical_op() <RPAREN> condition())
+<NEGATION> condition() optional_condition_bin_op()
+| LOOKAHEAD(3)
+  <LPAREN> condition() <RPAREN> optional_condition_bin_op()
+| expression() comp_op() expression() optional_condition_bin_op()
+}
+/*
+void condition() : {}//(17)
+{
+  <NEGATION> condition() [optional_condition_bin_op()]
+  | <LPAREN> condition() <RPAREN> [optional_condition_bin_op()]
+  | expression() comp_op() expression() [optional_condition_bin_op()]
+}*/
+
+void optional_condition_bin_op() : {}
+{
+    binary_logical_op() condition()
 }
 
 void binary_logical_op() : {}//(17a)
@@ -289,7 +287,7 @@ void comp_op() : {}//(18)
 
 void arg_list() : {}//(19)
 {
-  (nemp_arg_list())
+  [nemp_arg_list()]
 }
 
 void nemp_arg_list() : {}//(20)

@@ -18,25 +18,25 @@ Comments can appear between any two tokens. There are two forms of comment:
 one is delimited by /* and */ and can be nested;
 the other begins with // and is delimited by the end of line and this type of comments may not be nested.
 
-(1)
+(1) #
 <program> |= <decl_list> <function_list> <main>
 
-(2)
+(2) ? done i think
 <decl_list> |= (<decl> ; <decl_list> | E)
 
-(3)
+(3) #
 <decl> |= <var_decl> | <const_decl>
 
-(4)
+(4) #
 <var_decl> |= var identifier:<type>
 
-(5)
+(5) #
 <const_decl> |= const identifier:<type> = <expression>
 
-(6)
+(6) ? done i think
 <function_list> |= (<function> <function_list> | E)
 
-(7)
+(7) #
 <function> |= <type> identifier (<parameter_list>)
 {
 <decl_list>
@@ -44,25 +44,25 @@ the other begins with // and is delimited by the end of line and this type of co
 return ( <expression> | E) ;
 }
 
-(8)
+(8) #
 <type> |= integer | boolean | void
 
-(9)
+(9) #
 <parameter_list> |= <nemp_parameter_list> | E
 
-(10)
+(10) ? done i think
 <nemp_parameter_list> |= identifier:<type> | identifier:<type> , <nemp_parameter_list>
 
-(11)
+(11) #
 <main> |= main {
 <decl_list>
 <statement_block>
 }
 
-(12)
+(12) ? FIX
 <statement_block> |= (<statement> <statement_block>) | E
 
-(13)
+(13) #
 <statement> |= identifier = <expression> ; |
 identifier ( <arg_list> ) ; |
 { <statement_block> } |
@@ -70,29 +70,35 @@ if <condition> { <statement_block> } else {<statement_block> } |
 while <condition> { <statement_block> } |
 skip ;
 
-(14)
+(14) #
 <expression> |= <fragment> <binary_arith_op> <fragment> |
 ( <expression> ) |
 identifier (<arg_list> ) |
-identifier 
+<fragment>
 
-(15)
+(15) #
 <binary_arith_op> |= + | -
 
-(16)
+(16) #
 <fragment> |= identifier | - identifier | number | true | false | <expression>
 
-(17)
+(17) #
 <condition> |= ∼ <condition> |
 ( <condition> ) |
 <expression> <comp_op> <expression> |
-<condition>( || | && )<condition>
+<condition> <binary_logical_op> <condition>
 
-(18)
+void binary_logical_op() : {}//(17a)
+{
+  <OR>
+  | <AND>
+}
+
+(18) #
 <comp_op> |= == | != | < | <= | > | >=
 
-(19)
+(19) ? FIX
 <arg_list> |= <nemp_arg_list> | E
 
-(20)
+(20) ? FIX
 <nemp_arg_list> |= identifier | identifier , <nemp_arg_list>
