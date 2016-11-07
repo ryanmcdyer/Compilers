@@ -119,7 +119,7 @@ TOKEN : /* Operators */
   | < GREATERTHAN : ">" >
   | < GREATERTHANEQUALS : ">=" >
 }
-TOKEN : /* Numbers and identifiers */
+TOKEN : /* Numbers and IDs */
 {
   < NUMBER : <DIGIT>
     | <NONZERO> (<DIGIT>)*
@@ -130,7 +130,7 @@ TOKEN : /* Numbers and identifiers */
   | < ID : (<LETTER>)(<LETTER> | "_" | <DIGIT>)* >
   | < #LETTER : ["a" - "z", "A" - "Z"] >
 }
-TOKEN : /* Anything not recognised so far */
+TOKEN : /* Anything else */
 {
   < OTHER : ~[] >
 }
@@ -186,7 +186,7 @@ void type() : {}//(8)
 
 void parameter_list() : {}//(9)
 {
-  [nemp_parameter_list()]
+  (nemp_parameter_list())*
 }
 
 void nemp_parameter_list() : {}//(10)
@@ -229,9 +229,14 @@ void statement2() : {}//(13a)
 void expression() : {}//(14)
 {
   LOOKAHEAD(2)
-    fragment() [binary_arith_op() fragment()]
-  | <LPAREN> expression() <RPAREN> [binary_arith_op() fragment()]
-  | <ID> <LPAREN> arg_list() <RPAREN> [binary_arith_op() fragment()]
+  <ID> <LPAREN> arg_list() <RPAREN> optional_expression_bin_op()
+  | fragment() optional_expression_bin_op()
+  | <LPAREN> expression() <RPAREN> optional_expression_bin_op()
+}
+
+void optional_expression_bin_op() : {}//(14a)
+{
+    (binary_arith_op() fragment())?
 }
 
 void binary_arith_op() : {}//(15)
@@ -251,25 +256,19 @@ void fragment() : {}//(16)
 
 void condition() : {}//(17)
 {
-<NEGATION> condition() optional_condition_bin_op()
-| LOOKAHEAD(3)
-  <LPAREN> condition() <RPAREN> optional_condition_bin_op()
-| expression() comp_op() expression() optional_condition_bin_op()
-}
-/*
-void condition() : {}//(17)
-{
-  <NEGATION> condition() [optional_condition_bin_op()]
-  | <LPAREN> condition() <RPAREN> [optional_condition_bin_op()]
-  | expression() comp_op() expression() [optional_condition_bin_op()]
-}*/
-
-void optional_condition_bin_op() : {}
-{
-    binary_logical_op() condition()
+  <NEGATION> condition() optional_condition_bin_op()
+  | LOOKAHEAD(3)
+    <LPAREN> condition() <RPAREN> optional_condition_bin_op()
+  | expression() comp_op() expression() optional_condition_bin_op()
 }
 
-void binary_logical_op() : {}//(17a)
+void optional_condition_bin_op() : {}//(17a)
+{
+  (LOOKAHEAD(2)
+    binary_logical_op() condition())?
+}
+
+void binary_logical_op() : {}//(17b)
 {
   <OR>
   | <AND>
@@ -287,7 +286,7 @@ void comp_op() : {}//(18)
 
 void arg_list() : {}//(19)
 {
-  [nemp_arg_list()]
+  (nemp_arg_list())*
 }
 
 void nemp_arg_list() : {}//(20)

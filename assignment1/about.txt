@@ -59,7 +59,7 @@ return ( <expression> | E) ;
 <statement_block>
 }
 
-(12) ? FIX
+(12) #
 <statement_block> |= (<statement> <statement_block>) | E
 
 (13) #
