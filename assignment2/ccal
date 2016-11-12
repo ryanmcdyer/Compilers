@@ -1,0 +1,295 @@
+//Ryan McDyer
+//13431038
+
+options {
+  JAVA_UNICODE_ESCAPE = true;
+  IGNORE_CASE = true;
+}
+
+PARSER_BEGIN(CCALParser)
+public class CCALParser {
+  public static void main(String args[]) {
+    CCALParser parser;
+    if (args.length == 0) {
+      System.out.println("Reading from standard input . . .");
+      parser = new CCALParser(System.in);
+    } else if (args.length == 1) {
+      try {
+        parser = new CCALParser(new java.io.FileInputStream(args[0]));
+      } catch (java.io.FileNotFoundException e) {
+        System.err.println("File " + args[0] + " not found.");
+        return;
+      }
+    } else {
+      System.out.println("CCAL Parser: Usage is one of:");
+      System.out.println(" java CCALParser < inputfile");
+      System.out.println("OR");
+      System.out.println(" java CCALParser inputfile");
+      return;
+    }
+    try {
+      parser.program();
+      System.out.println("CCAL Parser: CCAL program parsed successfully.");
+    }
+    catch (ParseException e)
+    {
+      System.out.println(e.getMessage());
+      System.out.println("CCAL Parser:  Encountered errors during parse.");
+     }
+  }
+}
+PARSER_END(CCALParser)
+
+
+/*****************************************
+************ TOKEN DEFINITIONS ***********
+*****************************************/
+TOKEN_MGR_DECLS :
+{
+  static int commentNesting = 0;
+}
+SKIP : /*** Ignoring whitespaces ***/
+{
+  " "
+  | "\t"
+  | "\n"
+  | "\r"
+  | "\f"
+}
+SKIP : // COMMENTS, taken from lth.se
+{
+  < "//" (~["\n","\r"])* ("\n" | "\r" | "\r\n") >
+}
+SKIP : /* COMMENTS */
+{
+  <"/*"> { commentNesting++; } : IN_COMMENT
+}
+<IN_COMMENT> SKIP :
+{
+  <"/*"> { commentNesting++; }
+  | <"*/"> { commentNesting--;
+    if (commentNesting == 0)
+      SwitchTo(DEFAULT);
+  }
+  | <~[]>
+}
+<DEFAULT> SKIP : //The string "SKIP"
+{
+  <SKIP_STRING>
+}
+
+TOKEN : /* Keywords */
+{
+  < VAR : "var" >
+  | < CONST : "const" >
+  | < RETURN : "return" >
+  | < INTEGER : "integer" >
+  | < BOOLEAN : "boolean" >
+  | < VOID : "void" >
+  | < MAIN : "main" >
+  | < IF : "if" >
+  | < ELSE : "else" >
+  | < TRUE : "true" >
+  | < FALSE : "false" >
+  | < WHILE : "while" >
+  | < SKIP_STRING : "skip" >
+}
+TOKEN : /* Other reserved tokens*/
+{
+  < COMMA : "," >
+  | < SEMIC : ";" >
+  | < COLON : ":" >
+  | < LBRACE : "{" >
+  | < RBRACE : "}" >
+  | < LPAREN : "(" >
+  | < RPAREN : ")" >
+}
+TOKEN : /* Operators */
+{
+  < ASSIGN : "=" >
+  | < PLUS_SIGN : "+" >
+  | < MINUS_SIGN : "-" >
+  | < NEGATION : "~" >
+  | < OR : "||" >
+  | < AND : "&&" >
+  | < EQUALTO : "==" >
+  | < NOTEQUALTO : "!=" >
+  | < LESSTHAN : "<" >
+  | < LESSTHANEQUALS : "<=" >
+  | < GREATERTHAN : ">" >
+  | < GREATERTHANEQUALS : ">=" >
+}
+TOKEN : /* Numbers and IDs */
+{
+  < NUMBER : <DIGIT>
+    | <NONZERO> (<DIGIT>)*
+    | <MINUS_SIGN> <DIGIT>
+    | <MINUS_SIGN> <NONZERO> (<DIGIT>)* >
+  | < #DIGIT : ["0" - "9"] >
+  | < #NONZERO : ["1" - "9"] >
+  | < ID : (<LETTER>)(<LETTER> | "_" | <DIGIT>)* >
+  | < #LETTER : ["a" - "z", "A" - "Z"] >
+}
+TOKEN : /* Anything else */
+{
+  < OTHER : ~[] >
+}
+/***********************************
+************ THE GRAMMAR ***********
+***********************************/
+void program() : {}//(1)
+{
+  decl_list() function_list() main()
+}
+
+void decl_list() : {}//(2)
+{
+  (decl())*
+}
+
+void decl() : {}//(3)
+{
+  (var_decl() | const_decl()) <SEMIC>
+}
+
+void var_decl() : {}//(4)
+{
+  <VAR> <ID><COLON>type()
+}
+
+void const_decl() : {}//(5)
+{
+  <CONST> <ID><COLON>type() <ASSIGN> expression()
+}
+
+void function_list() : {}//(6)
+{
+  (function())*
+}
+
+void function() : {}//(7)
+{
+  type() <ID> <LPAREN> parameter_list() <RPAREN>
+  <LBRACE>
+    decl_list()
+    statement_block()
+    <RETURN> <LPAREN> [expression()] <RPAREN> <SEMIC>
+  <RBRACE>
+}
+
+void type() : {}//(8)
+{
+  <INTEGER>
+  | <BOOLEAN>
+  | <VOID>
+}
+
+void parameter_list() : {}//(9)
+{
+  (nemp_parameter_list())*
+}
+
+void nemp_parameter_list() : {}//(10)
+{
+  <ID><COLON>type() [<COMMA> nemp_parameter_list()]
+}
+
+void main() : {}//(11)
+{
+  <MAIN> <LBRACE>
+    decl_list()
+    statement_block()
+  <RBRACE>
+}
+
+void statement_block() : {}//(12)
+{
+  [statement() statement_block()]
+}
+
+void statement() : {}//(13)
+{
+  <ID> statement2()
+  | <LBRACE> statement_block() <RBRACE>
+  | <IF> condition()
+    <LBRACE> statement_block() <RBRACE>
+    <ELSE>
+    <LBRACE> statement_block() <RBRACE>
+  | <WHILE> condition()
+    <LBRACE> statement_block() <RBRACE>
+  | <SKIP_STRING> <SEMIC>
+}
+
+void statement2() : {}//(13a)
+{
+  <ASSIGN> expression() <SEMIC>
+  | <LPAREN> arg_list() <RPAREN> <SEMIC>
+}
+
+void expression() : {}//(14)
+{
+  LOOKAHEAD(2)
+  <ID> <LPAREN> arg_list() <RPAREN> optional_expression_bin_op()
+  | fragment() optional_expression_bin_op()
+  | <LPAREN> expression() <RPAREN> optional_expression_bin_op()
+}
+
+void optional_expression_bin_op() : {}//(14a)
+{
+    (binary_arith_op() fragment())?
+}
+
+void binary_arith_op() : {}//(15)
+{
+  <PLUS_SIGN>
+  | <MINUS_SIGN>
+}
+
+void fragment() : {}//(16)
+{
+  <ID>
+  | <MINUS_SIGN> <ID>
+  | <NUMBER>
+  | <TRUE>
+  | <FALSE>
+}
+
+void condition() : {}//(17)
+{
+  <NEGATION> condition() optional_condition_bin_op()
+  | LOOKAHEAD(3)
+    <LPAREN> condition() <RPAREN> optional_condition_bin_op()
+  | expression() comp_op() expression() optional_condition_bin_op()
+}
+
+void optional_condition_bin_op() : {}//(17a)
+{
+  (LOOKAHEAD(2)
+    binary_logical_op() condition())?
+}
+
+void binary_logical_op() : {}//(17b)
+{
+  <OR>
+  | <AND>
+}
+
+void comp_op() : {}//(18)
+{
+  <EQUALTO>
+  | <NOTEQUALTO>
+  | <LESSTHAN>
+  | <LESSTHANEQUALS>
+  | <GREATERTHAN>
+  | <GREATERTHANEQUALS>
+}
+
+void arg_list() : {}//(19)
+{
+  (nemp_arg_list())*
+}
+
+void nemp_arg_list() : {}//(20)
+{
+  <ID> [<COMMA> nemp_arg_list()]
+}
