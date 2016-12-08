@@ -4,30 +4,58 @@
 options {
   JAVA_UNICODE_ESCAPE = true;
   IGNORE_CASE = true;
+  MULTI = true;
+  VISITOR = true;
 }
 
-PARSER_BEGIN(CCALParser)
-public class CCALParser {
-  public static void main(String args[]) {
-    CCALParser parser;
+PARSER_BEGIN(CCAL)
+
+import java.util.*;
+import java.io.*;
+
+public class CCAL {
+
+  public static Hashtable ST = new Hashtable();
+
+  public static void main(String args[]) throws ParseException {
+    CCAL parser;
+    String temp;
+    STC temp2;
     if (args.length == 0) {
       System.out.println("Reading from standard input . . .");
-      parser = new CCALParser(System.in);
+      parser = new CCAL(System.in);
     } else if (args.length == 1) {
       try {
-        parser = new CCALParser(new java.io.FileInputStream(args[0]));
+        parser = new CCAL(new java.io.FileInputStream(args[0]));
+        SimpleNode root = parser.program();
+        root.dump(" ");
+
+        Enumeration t = ST.keys();
+
+         while ( t.hasMoreElements()  ) {
+
+              temp = (String)t.nextElement();
+              temp2 = (STC)ST.get(temp);
+              System.out.println(temp);
+              if ( temp2.type != null )
+                System.out.println(" type = " + temp2.type);
+              if ( temp2.value != null )
+                System.out.println(" value = " + temp2.value);
+
+        }
+
       } catch (java.io.FileNotFoundException e) {
         System.err.println("File " + args[0] + " not found.");
         return;
       }
     } else {
       System.out.println("CCAL Parser: Usage is one of:");
-      System.out.println(" java CCALParser < inputfile");
+      System.out.println(" java CCAL < inputfile");
       System.out.println("OR");
-      System.out.println(" java CCALParser inputfile");
+      System.out.println(" java CCAL inputfile");
       return;
     }
-    try {
+    /*try {
       parser.program();
       System.out.println("CCAL Parser: CCAL program parsed successfully.");
     }
@@ -35,10 +63,10 @@ public class CCALParser {
     {
       System.out.println(e.getMessage());
       System.out.println("CCAL Parser:  Encountered errors during parse.");
-     }
+    }*/
   }
 }
-PARSER_END(CCALParser)
+PARSER_END(CCAL)
 
 
 /*****************************************
@@ -47,6 +75,7 @@ PARSER_END(CCALParser)
 TOKEN_MGR_DECLS :
 {
   static int commentNesting = 0;
+  static int lineNumber = 0;
 }
 SKIP : /*** Ignoring whitespaces ***/
 {
@@ -58,7 +87,7 @@ SKIP : /*** Ignoring whitespaces ***/
 }
 SKIP : // COMMENTS, taken from lth.se
 {
-  < "//" (~["\n","\r"])* ("\n" | "\r" | "\r\n") >
+  < "//" (~["\n","\r"])* ("\n" | "\r" | "\r\n") > //{ lineNumber++; }
 }
 SKIP : /* COMMENTS */
 {
@@ -137,9 +166,9 @@ TOKEN : /* Anything else */
 /***********************************
 ************ THE GRAMMAR ***********
 ***********************************/
-void program() : {}//(1)
+SimpleNode program() #PROGRAM : {}//(1)
 {
-  decl_list() function_list() main()
+  decl_list() function_list() main() <EOF> {return jjtThis;}
 }
 
 void decl_list() : {}//(2)
@@ -152,12 +181,12 @@ void decl() : {}//(3)
   (var_decl() | const_decl()) <SEMIC>
 }
 
-void var_decl() : {}//(4)
+void var_decl() #VAR : {}//(4)
 {
   <VAR> <ID><COLON>type()
 }
 
-void const_decl() : {}//(5)
+void const_decl() #CONST : {}//(5)
 {
   <CONST> <ID><COLON>type() <ASSIGN> expression()
 }
@@ -167,7 +196,7 @@ void function_list() : {}//(6)
   (function())*
 }
 
-void function() : {}//(7)
+void function() #FUNCTION : {}//(7)
 {
   type() <ID> <LPAREN> parameter_list() <RPAREN>
   <LBRACE>
@@ -177,7 +206,7 @@ void function() : {}//(7)
   <RBRACE>
 }
 
-void type() : {}//(8)
+void type() #TYPE : {}//(8)
 {
   <INTEGER>
   | <BOOLEAN>
@@ -194,7 +223,7 @@ void nemp_parameter_list() : {}//(10)
   <ID><COLON>type() [<COMMA> nemp_parameter_list()]
 }
 
-void main() : {}//(11)
+void main() #MAIN : {}//(11)
 {
   <MAIN> <LBRACE>
     decl_list()
@@ -207,7 +236,7 @@ void statement_block() : {}//(12)
   [statement() statement_block()]
 }
 
-void statement() : {}//(13)
+void statement() #STATEMENT : {}//(13)
 {
   <ID> statement2()
   | <LBRACE> statement_block() <RBRACE>
