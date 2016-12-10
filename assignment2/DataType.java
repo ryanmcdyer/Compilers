@@ -1,8 +1,15 @@
 public enum DataType
 {
-    Program,
-    Declaration,
-    TypeUnknown,
-    TypeInteger,
-    TypeBoolean
+  SimpleNode,
+  Program,
+  VariableDecl,
+  ConstantDecl,
+  Function,
+  ParamList,
+  Main,
+  Statement,
+  Boolean,
+  Number,
+  ArgList,
+  TypeUnknown
 }

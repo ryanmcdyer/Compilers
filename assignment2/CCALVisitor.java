@@ -10,10 +10,12 @@ public interface CCALVisitor
   public Object visit(ASTParam node, Object data);
   public Object visit(ASTMain node, Object data);
   public Object visit(ASTStatement node, Object data);
-  public Object visit(ASTIf node, Object data);
-  public Object visit(ASTWhile node, Object data);
-  public Object visit(ASTASSIGN node, Object data);
+  public Object visit(ASTIfCond node, Object data);
+  public Object visit(ASTWhileCond node, Object data);
+  public Object visit(ASTAssignment node, Object data);
   public Object visit(ASTMath_Op node, Object data);
+  public Object visit(ASTAddOperation node, Object data);
+  public Object visit(ASTSubOperation node, Object data);
   public Object visit(ASTFragment node, Object data);
   public Object visit(ASTId node, Object data);
   public Object visit(ASTNumber node, Object data);
@@ -22,4 +24,4 @@ public interface CCALVisitor
   public Object visit(ASTCompare_Op node, Object data);
   public Object visit(ASTArg node, Object data);
 }
-/* JavaCC - OriginalChecksum=3e665ce09b1a198371a11e78249f44c5 (do not edit this line) */
+/* JavaCC - OriginalChecksum=ab14c2d692b18ca8646e07c78340bcb6 (do not edit this line) */

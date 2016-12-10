@@ -38,24 +38,10 @@ public class CCAL {
         root.dump(" ");
 
         System.out.println();
-        System.out.println("Symbol Table:");
-        Enumeration t = ST.keys();
 
-        while (t.hasMoreElements()) {
-          temp = (String) t.nextElement();
-          temp2 = (SymbolTable) ST.get(temp);
-          System.out.println(temp);
-          if ( temp2.type != null )
-          System.out.println(" type = " + temp2.type);
-          if ( temp2.value != null )
-          System.out.println(" value = " + temp2.value);
-        }
-
-/*
-				SCVisitor visitor = new SCVisitor();
-        program.jjtAccept(visitor, null);
+			/*	SCVisitor visitor = new SCVisitor();
+        root.jjtAccept(visitor, null);
 */
-
 /*
         System.out.println();
         System.out.println("Program:");
@@ -196,12 +182,12 @@ void decl() : {}//(3)
 
 void var_decl() #Var_decl : {}//(4)
 {
-  <VAR> <ID><COLON>type() <SEMIC>
+  <VAR> id()<COLON>type() <SEMIC>
 }
 
 void const_decl() #Const_decl : {}//(5)
 {
-  <CONST> <ID><COLON>type() <ASSIGN> expression() <SEMIC>
+  <CONST> id()<COLON>type() <ASSIGN> expression() <SEMIC>
 }
 
 void function_list() : {}//(6)
@@ -211,7 +197,7 @@ void function_list() : {}//(6)
 
 void function() #Function : {}//(7)
 {
-  type() <ID> <LPAREN> parameter_list() <RPAREN>
+  type() id() <LPAREN> parameter_list() <RPAREN>
   <LBRACE>
     decl_list()
     statement_block()
@@ -233,7 +219,7 @@ void parameter_list() : {}//(9)
 
 void nemp_parameter_list() #Param : {}//(10)
 {
-  <ID><COLON>type() [<COMMA> nemp_parameter_list()]
+  id()<COLON>type() [<COMMA> nemp_parameter_list()]
 }
 
 void main() #Main : {}//(11)
@@ -251,27 +237,28 @@ void statement_block() : {}//(12)
 
 void statement() #Statement : {}//(13)
 {
-  <ID> statement2()
+  LOOKAHEAD(2)
+  assignment()
+  | id() <LPAREN> arg_list() <RPAREN> <SEMIC>
   | <LBRACE> statement_block() <RBRACE>
   | <IF> condition()
     <LBRACE> statement_block() <RBRACE>
     <ELSE>
-    <LBRACE> statement_block() <RBRACE> #If
-  | <WHILE> condition() #While
-    <LBRACE> statement_block() <RBRACE>
+    <LBRACE> statement_block() <RBRACE> #IfCond
+  | <WHILE> condition()
+    <LBRACE> statement_block() <RBRACE> #WhileCond
   | <SKIP_STRING> <SEMIC>
 }
 
-void statement2() : {}//(13a)
+void assignment() #Assignment : {} //(13a)
 {
-  ( <ASSIGN> expression() <SEMIC> ) #ASSIGN
-  | <LPAREN> arg_list() <RPAREN> <SEMIC>
+  id() <ASSIGN> expression() <SEMIC>
 }
 
 void expression() : {}//(14)
 {
   LOOKAHEAD(2)
-  <ID> <LPAREN> arg_list() <RPAREN> (optional_expression_bin_op())?
+  id() <LPAREN> arg_list() <RPAREN> (optional_expression_bin_op())?
   | fragment() (optional_expression_bin_op())?
   | <LPAREN> expression() <RPAREN> (optional_expression_bin_op())?
 }
@@ -285,8 +272,8 @@ void binary_arith_op() #Math_Op : {}//(15)
 {
   /*<PLUS_SIGN> { jjtThis.value = token; }
   | <MINUS_SIGN> { jjtThis.value = token; }*/
-  <PLUS_SIGN> fragment() { jjtThis.value = new Token(PLUS_SIGN, tokenImage[PLUS_SIGN]); }
-  | <MINUS_SIGN> fragment() { jjtThis.value = new Token(MINUS_SIGN, tokenImage[MINUS_SIGN]); }
+  <PLUS_SIGN> fragment() { jjtThis.value = new Token(PLUS_SIGN, tokenImage[PLUS_SIGN]); } #AddOperation(2)
+  | <MINUS_SIGN> fragment() { jjtThis.value = new Token(MINUS_SIGN, tokenImage[MINUS_SIGN]); } #SubOperation(2)
 }
 
 void fragment() #Fragment : {}//(16)
@@ -299,7 +286,7 @@ void fragment() #Fragment : {}//(16)
 
 void id() #Id : { Token t; } //(16a)
 {
-  <ID> { jjtThis.value = token; }
+  t = <ID> { jjtThis.value = token; }
 }
 
 void number() #Number : { Token t; } //(16b)
@@ -307,7 +294,7 @@ void number() #Number : { Token t; } //(16b)
   <NUMBER> { jjtThis.value = token; }
 }
 
-void booleanValue() #Boolean : { Token t; } //(16c)
+void booleanValue() #Boolean : {} //(16c)
 {
   <TRUE> { jjtThis.value = token; }
   | <FALSE> { jjtThis.value = token; }
@@ -350,5 +337,5 @@ void arg_list() : {}//(19)
 
 void nemp_arg_list() #Arg : {}//(20)
 {
-  <ID> [<COMMA> nemp_arg_list()]
+  id() [<COMMA> nemp_arg_list()]
 }

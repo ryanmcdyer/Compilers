@@ -10,17 +10,19 @@ public interface CCALTreeConstants
   public int JJTPARAM = 6;
   public int JJTMAIN = 7;
   public int JJTSTATEMENT = 8;
-  public int JJTIF = 9;
-  public int JJTWHILE = 10;
-  public int JJTASSIGN = 11;
+  public int JJTIFCOND = 9;
+  public int JJTWHILECOND = 10;
+  public int JJTASSIGNMENT = 11;
   public int JJTMATH_OP = 12;
-  public int JJTFRAGMENT = 13;
-  public int JJTID = 14;
-  public int JJTNUMBER = 15;
-  public int JJTBOOLEAN = 16;
-  public int JJTLOGIC_OP = 17;
-  public int JJTCOMPARE_OP = 18;
-  public int JJTARG = 19;
+  public int JJTADDOPERATION = 13;
+  public int JJTSUBOPERATION = 14;
+  public int JJTFRAGMENT = 15;
+  public int JJTID = 16;
+  public int JJTNUMBER = 17;
+  public int JJTBOOLEAN = 18;
+  public int JJTLOGIC_OP = 19;
+  public int JJTCOMPARE_OP = 20;
+  public int JJTARG = 21;
 
 
   public String[] jjtNodeName = {
@@ -33,10 +35,12 @@ public interface CCALTreeConstants
     "Param",
     "Main",
     "Statement",
-    "If",
-    "While",
-    "ASSIGN",
+    "IfCond",
+    "WhileCond",
+    "Assignment",
     "Math_Op",
+    "AddOperation",
+    "SubOperation",
     "Fragment",
     "Id",
     "Number",
@@ -46,4 +50,4 @@ public interface CCALTreeConstants
     "Arg",
   };
 }
-/* JavaCC - OriginalChecksum=2d26a996f878f11e2a35ffc40c65f2db (do not edit this line) */
+/* JavaCC - OriginalChecksum=169656a86cfd388ba4e7f6c87eccb683 (do not edit this line) */
