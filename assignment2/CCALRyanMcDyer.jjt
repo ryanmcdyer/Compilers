@@ -177,7 +177,7 @@ TOKEN : /* Anything else */
 ***********************************/
 SimpleNode program() #PROGRAM : {}//(1)
 {
-  decl_list() function_list() main() <EOF> {return jjtThis;}
+  decl_list() function_list() main() <EOF> { return jjtThis; }
 }
 
 void decl_list() : {}//(2)
@@ -277,19 +277,19 @@ void optional_expression_bin_op() : {}//(14a)
     (binary_arith_op() fragment())?
 }
 
-void binary_arith_op() : {}//(15)
+void binary_arith_op() #MATH_OP : {}//(15)
 {
   <PLUS_SIGN> { jjtThis.value = token; }
   | <MINUS_SIGN> { jjtThis.value = token; }
 }
 
-void fragment() : {}//(16)
+void fragment() #FRAGMENT : {}//(16)
 {
   <ID> { jjtThis.value = token; }
   | <MINUS_SIGN> <ID>
   | <NUMBER> { jjtThis.value = token; }
   | <TRUE> { jjtThis.value = token; }
-  | <FALSE> { jjtThis.value = token; }
+  | <FALSE> { jjtThis.value = token.image; }
 }
 
 void condition() : {}//(17)
@@ -306,13 +306,13 @@ void optional_condition_bin_op() : {}//(17a)
     binary_logical_op() condition())?
 }
 
-void binary_logical_op() : { Token t; }//(17b)
+void binary_logical_op() #LOGIC_OP: { Token t; }//(17b)
 {
   <OR> { jjtThis.value = token; }
   | <AND> { jjtThis.value = token; }
 }
 
-void comp_op() : { Token t; }//(18)
+void comp_op() #COMP_OP : { Token t; }//(18)
 {
   <EQUALTO> { jjtThis.value = token; }
   | <NOTEQUALTO> { jjtThis.value = token; }
