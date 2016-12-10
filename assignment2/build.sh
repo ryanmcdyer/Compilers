@@ -1,9 +1,46 @@
 #!/bin/bash
-mv STC.java STC.j
-rm *.java
-mv STC.j STC.java
 rm *.class
-#cp ../Parserjava/STC.java .
+
+FILE="SymbolTable"
+if [ -f $FILE.java ]
+then
+  echo "Backing up $FILE"
+  mv $FILE.java $FILE.j
+fi
+FILE="DataType"
+if [ -f $FILE.java ]
+then
+  echo "Backing up $FILE"
+  mv $FILE.java $FILE.j
+fi
+FILE="SCVisitor"
+if [ -f $FILE.java ]
+then
+  echo "Backing up $FILE"
+  mv $FILE.java $FILE.j
+fi
+
+rm *.java
+
+FILE="SymbolTable"
+if [ -f $FILE.j ]
+then
+  echo "Restoring $FILE"
+  mv $FILE.j $FILE.java
+fi
+FILE="DataType"
+if [ -f $FILE.j ]
+then
+  echo "Restoring $FILE"
+  mv $FILE.j $FILE.java
+fi
+FILE="SCVisitor"
+if [ -f $FILE.j ]
+then
+  echo "Restoring $FILE"
+  mv $FILE.j $FILE.java
+fi
+
 jjtree CCALRyanMcDyer.jjt
 echo ""
 javacc CCALRyanMcDyer.jj

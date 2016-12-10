@@ -20,10 +20,10 @@ public class CCAL {
 
   public static void main(String args[]) throws ParseException {
 
-    CCAL    parser;
+    CCAL parser;
 
-    String  temp;
-    STC     temp2;
+    String temp;
+    SymbolTable temp2;
 
     if (args.length == 0) {
       System.out.println("Reading from standard input . . .");
@@ -42,8 +42,8 @@ public class CCAL {
         Enumeration t = ST.keys();
 
         while (t.hasMoreElements()) {
-          temp = (String)t.nextElement();
-          temp2 = (STC)ST.get(temp);
+          temp = (String) t.nextElement();
+          temp2 = (SymbolTable) ST.get(temp);
           System.out.println(temp);
           if ( temp2.type != null )
           System.out.println(" type = " + temp2.type);
@@ -51,6 +51,10 @@ public class CCAL {
           System.out.println(" value = " + temp2.value);
         }
 
+/*
+				SCVisitor visitor = new SCVisitor();
+        program.jjtAccept(visitor, null);
+*/
 
 /*
         System.out.println();
@@ -175,7 +179,7 @@ TOKEN : /* Anything else */
 /***********************************
 ************ THE GRAMMAR ***********
 ***********************************/
-SimpleNode program() #PROGRAM : {}//(1)
+SimpleNode program() #Program : {}//(1)
 {
   decl_list() function_list() main() <EOF> { return jjtThis; }
 }
@@ -187,17 +191,17 @@ void decl_list() : {}//(2)
 
 void decl() : {}//(3)
 {
-  (var_decl() | const_decl()) <SEMIC>
+  (var_decl() | const_decl())
 }
 
-void var_decl() #VAR : {}//(4)
+void var_decl() #Var_decl : {}//(4)
 {
-  <VAR> <ID><COLON>type()
+  <VAR> <ID><COLON>type() <SEMIC>
 }
 
-void const_decl() #CONST : {}//(5)
+void const_decl() #Const_decl : {}//(5)
 {
-  <CONST> <ID><COLON>type() <ASSIGN> expression()
+  <CONST> <ID><COLON>type() <ASSIGN> expression() <SEMIC>
 }
 
 void function_list() : {}//(6)
@@ -205,7 +209,7 @@ void function_list() : {}//(6)
   (function())*
 }
 
-void function() #FUNCTION : {}//(7)
+void function() #Function : {}//(7)
 {
   type() <ID> <LPAREN> parameter_list() <RPAREN>
   <LBRACE>
@@ -215,7 +219,7 @@ void function() #FUNCTION : {}//(7)
   <RBRACE>
 }
 
-void type() #TYPE : {}//(8)
+void type() #Type : {}//(8)
 {
   <INTEGER> { jjtThis.value = token; }
   | <BOOLEAN> { jjtThis.value = token; }
@@ -227,12 +231,12 @@ void parameter_list() : {}//(9)
   (nemp_parameter_list())*
 }
 
-void nemp_parameter_list() : {}//(10)
+void nemp_parameter_list() #Param : {}//(10)
 {
   <ID><COLON>type() [<COMMA> nemp_parameter_list()]
 }
 
-void main() #MAIN : {}//(11)
+void main() #Main : {}//(11)
 {
   <MAIN> <LBRACE>
     decl_list()
@@ -245,51 +249,68 @@ void statement_block() : {}//(12)
   [statement() statement_block()]
 }
 
-void statement() #STATEMENT : {}//(13)
+void statement() #Statement : {}//(13)
 {
   <ID> statement2()
   | <LBRACE> statement_block() <RBRACE>
   | <IF> condition()
     <LBRACE> statement_block() <RBRACE>
     <ELSE>
-    <LBRACE> statement_block() <RBRACE>
-  | <WHILE> condition()
+    <LBRACE> statement_block() <RBRACE> #If
+  | <WHILE> condition() #While
     <LBRACE> statement_block() <RBRACE>
   | <SKIP_STRING> <SEMIC>
 }
 
 void statement2() : {}//(13a)
 {
-  <ASSIGN> expression() <SEMIC>
+  ( <ASSIGN> expression() <SEMIC> ) #ASSIGN
   | <LPAREN> arg_list() <RPAREN> <SEMIC>
 }
 
 void expression() : {}//(14)
 {
   LOOKAHEAD(2)
-  <ID> <LPAREN> arg_list() <RPAREN> optional_expression_bin_op()
-  | fragment() optional_expression_bin_op()
-  | <LPAREN> expression() <RPAREN> optional_expression_bin_op()
+  <ID> <LPAREN> arg_list() <RPAREN> (optional_expression_bin_op())?
+  | fragment() (optional_expression_bin_op())?
+  | <LPAREN> expression() <RPAREN> (optional_expression_bin_op())?
 }
 
 void optional_expression_bin_op() : {}//(14a)
 {
-    (binary_arith_op() fragment())?
+    binary_arith_op()
 }
 
-void binary_arith_op() #MATH_OP : {}//(15)
+void binary_arith_op() #Math_Op : {}//(15)
 {
-  <PLUS_SIGN> { jjtThis.value = token; }
-  | <MINUS_SIGN> { jjtThis.value = token; }
+  /*<PLUS_SIGN> { jjtThis.value = token; }
+  | <MINUS_SIGN> { jjtThis.value = token; }*/
+  <PLUS_SIGN> fragment() { jjtThis.value = new Token(PLUS_SIGN, tokenImage[PLUS_SIGN]); }
+  | <MINUS_SIGN> fragment() { jjtThis.value = new Token(MINUS_SIGN, tokenImage[MINUS_SIGN]); }
 }
 
-void fragment() #FRAGMENT : {}//(16)
+void fragment() #Fragment : {}//(16)
+{
+  id()
+  | <MINUS_SIGN> id()
+  | number()
+  | booleanValue()
+}
+
+void id() #Id : { Token t; } //(16a)
 {
   <ID> { jjtThis.value = token; }
-  | <MINUS_SIGN> <ID>
-  | <NUMBER> { jjtThis.value = token; }
-  | <TRUE> { jjtThis.value = token; }
-  | <FALSE> { jjtThis.value = token.image; }
+}
+
+void number() #Number : { Token t; } //(16b)
+{
+  <NUMBER> { jjtThis.value = token; }
+}
+
+void booleanValue() #Boolean : { Token t; } //(16c)
+{
+  <TRUE> { jjtThis.value = token; }
+  | <FALSE> { jjtThis.value = token; }
 }
 
 void condition() : {}//(17)
@@ -297,29 +318,29 @@ void condition() : {}//(17)
   <NEGATION> condition() optional_condition_bin_op()
   | LOOKAHEAD(3)
     <LPAREN> condition() <RPAREN> optional_condition_bin_op()
-  | expression() comp_op() expression() optional_condition_bin_op()
+  | expression() comp_op() optional_condition_bin_op()
 }
 
 void optional_condition_bin_op() : {}//(17a)
 {
   (LOOKAHEAD(2)
-    binary_logical_op() condition())?
+    binary_logical_op())?
 }
 
-void binary_logical_op() #LOGIC_OP: { Token t; }//(17b)
+void binary_logical_op() #Logic_Op: {}//(17b)
 {
-  <OR> { jjtThis.value = token; }
-  | <AND> { jjtThis.value = token; }
+  <OR> condition() { jjtThis.value = token; }
+  | <AND> condition() { jjtThis.value = token; }
 }
 
-void comp_op() #COMP_OP : { Token t; }//(18)
+void comp_op() #Compare_Op : { Token t; }//(18)
 {
-  <EQUALTO> { jjtThis.value = token; }
-  | <NOTEQUALTO> { jjtThis.value = token; }
-  | <LESSTHAN> { jjtThis.value = token; }
-  | <LESSTHANEQUALS> { jjtThis.value = token; }
-  | <GREATERTHAN> { jjtThis.value = token; }
-  | <GREATERTHANEQUALS> { jjtThis.value = token; }
+  <EQUALTO> expression() { jjtThis.value = token; }
+  | <NOTEQUALTO> expression() { jjtThis.value = token; }
+  | <LESSTHAN> expression() { jjtThis.value = token; }
+  | <LESSTHANEQUALS> expression() { jjtThis.value = token; }
+  | <GREATERTHAN> expression() { jjtThis.value = token; }
+  | <GREATERTHANEQUALS> expression() { jjtThis.value = token; }
 }
 
 void arg_list() : {}//(19)
@@ -327,7 +348,7 @@ void arg_list() : {}//(19)
   (nemp_arg_list())*
 }
 
-void nemp_arg_list() : {}//(20)
+void nemp_arg_list() #Arg : {}//(20)
 {
   <ID> [<COMMA> nemp_arg_list()]
 }
