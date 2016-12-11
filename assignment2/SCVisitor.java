@@ -41,7 +41,7 @@ public class SCVisitor implements CCALVisitor {
       System.out.println("There were no functions declared");
     }
 		else if(declaredFunctions.size() == calledFunctions.size()) {
-			System.out.println("All " + declaredFunctions.size() + " functions were called.");
+			System.out.println("All " + declaredFunctions.size() + " function(s) were called.");
 		} else {
       Set<String> diff = declaredFunctions;
       diff.removeAll(calledFunctions);
@@ -221,6 +221,7 @@ public class SCVisitor implements CCALVisitor {
 
   public Object visit(ASTMain node, Object data) {
     scopes.push("Function: Main");
+    symbolTable.put(scopes.peek(), new HashMap<String, SymbolTable>());
 		node.childrenAccept(this, data);
     scopes.pop();
     return null;
@@ -321,26 +322,31 @@ public class SCVisitor implements CCALVisitor {
   }*/
 
   public Object visit(ASTAddOperation node, Object data) {
-		//checkExpression(node.jjtGetChild(0).jjtAccept(this, data));
-		//checkExpression(node.jjtGetChild(1).jjtAccept(this, data));
+		checkIsInt(node.jjtGetChild(0).jjtAccept(this, data));
+		checkIsInt(node.jjtGetChild(1).jjtAccept(this, data));
 		return Arrays.asList(node.jjtGetChild(0).jjtAccept(this, data), node.jjtGetChild(1).jjtAccept(this, data));
   }
 
   public Object visit(ASTSubOperation node, Object data) {
-		//checkExpression(node.jjtGetChild(0).jjtAccept(this, data));
-		//checkExpression(node.jjtGetChild(1).jjtAccept(this, data));
+		checkIsInt(node.jjtGetChild(0).jjtAccept(this, data));
+		checkIsInt(node.jjtGetChild(1).jjtAccept(this, data));
 		return Arrays.asList(node.jjtGetChild(0).jjtAccept(this, data), node.jjtGetChild(1).jjtAccept(this, data));
   }
 
-  /*public void checkExpression(Object o) {
-
-  }*/
+  public void checkIsInt(Object data) {
+    return;
+  }
 
   public Object visit(ASTId node, Object data) {
 
+    System.out.println(node);
     Token token = (Token) node.jjtGetValue();
+    System.out.println(token);
 		HashMap<String, SymbolTable> scopedST = symbolTable.get(scopes.peek());
+    System.out.println("Scope "  + scopes.peek());
+    System.out.println(scopedST);
 		HashMap<String, SymbolTable> globalST = symbolTable.get(GLOBAL_SCOPE);
+    System.out.println(globalST);
 
     //System.out.println("ScopedST of \"" + scopes.peek() + "\" : " + scopedST);
 		SymbolTable idInCurrentScope = scopedST.get(token.image);

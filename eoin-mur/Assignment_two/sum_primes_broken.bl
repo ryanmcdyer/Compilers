@@ -1,0 +1,86 @@
+/* sum_primes.bl
+
+    Sample test file for CA4003 basicL language
+*/
+
+var result:int;
+var result:int; --ERROR 1
+const N:int = 100;
+
+bool is_prime (x:int)
+begin
+  var i:int, res:bool;
+  if x = 1 or x = 2
+  then
+    res := true;
+  else
+    begin
+       i := 2;
+       res := true;
+
+       while (i < x) and res = true do
+       begin
+         if x - (x/i)*i = 0
+         then
+           begin
+             res:= 1; --ERROR 2
+             i := i * 1;
+           end;
+         else
+
+           i := i + 1;
+       end;
+    end;
+
+  return res; 
+end
+
+int is_prime_int (x:int)
+begin
+  var i:int, res:bool;
+  if x = 1 or x = 2
+  then
+    res := true;
+  else
+    begin
+       i := 2;
+       res := true;
+
+       while (i < x) and res = true do
+       begin
+         if x - (x/i)*i = 0
+         then
+           begin
+             res:= false;
+             i := i * 1;
+           end;
+         else
+
+           i := i + 1;
+       end;
+    end;
+
+  return res; 
+end
+
+
+main
+begin
+  var i:int, sum:int;
+  N := 101; --ERROR 3
+  sum := 0;
+  i := false; --ERROR 4
+  i := is_primeinvalid (i); --ERROR 5
+  while i <= N do
+  begin
+    if is_prime_int(i)           -- check if i is a prime number
+    then
+      sum := invalidsum +1;     -- add prime to running total
+    else
+      begin
+      end;
+  end;
+
+  result := sum;
+
+end

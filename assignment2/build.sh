@@ -19,6 +19,12 @@ then
   echo "Backing up $FILE"
   mv $FILE.java $FILE.j
 fi
+FILE="Quad"
+if [ -f $FILE.java ]
+then
+  echo "Backing up $FILE"
+  mv $FILE.java $FILE.j
+fi
 
 rm *.java
 
@@ -35,6 +41,12 @@ then
   mv $FILE.j $FILE.java
 fi
 FILE="SCVisitor"
+if [ -f $FILE.j ]
+then
+  echo "Restoring $FILE"
+  mv $FILE.j $FILE.java
+fi
+FILE="Quad"
 if [ -f $FILE.j ]
 then
   echo "Restoring $FILE"

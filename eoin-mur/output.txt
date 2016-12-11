@@ -1,0 +1,202 @@
+---------compiling jjt Files---------
+
+Java Compiler Compiler Version 5.0 (Tree Builder)
+(type "jjtree" with no arguments for help)
+Reading from file BasicL.jjt . . .
+File "Node.java" is being rebuilt.
+File "SimpleNode.java" is being rebuilt.
+File "ASTProgram.java" is being rebuilt.
+File "ASTDecl.java" is being rebuilt.
+File "ASTConstDecl.java" is being rebuilt.
+File "ASTFunction_Decl.java" is being rebuilt.
+File "ASTFunction_body.java" is being rebuilt.
+File "ASTParams.java" is being rebuilt.
+File "ASTType.java" is being rebuilt.
+File "ASTMain.java" is being rebuilt.
+File "ASTAssign.java" is being rebuilt.
+File "ASTAdd.java" is being rebuilt.
+File "ASTMult.java" is being rebuilt.
+File "ASTAddOp.java" is being rebuilt.
+File "ASTMultOp.java" is being rebuilt.
+File "ASTBoolOpp.java" is being rebuilt.
+File "ASTCondition.java" is being rebuilt.
+File "ASTIdent_list.java" is being rebuilt.
+File "ASTArg_list.java" is being rebuilt.
+File "ASTNum.java" is being rebuilt.
+File "ASTBool.java" is being rebuilt.
+File "ASTFunctionCall.java" is being rebuilt.
+File "BasicLTreeConstants.java" is being rebuilt.
+File "BasicLVisitor.java" is being rebuilt.
+File "JJTBasicLState.java" is being rebuilt.
+Annotated grammar generated successfully in .\BasicL.jj
+
+---------compiling jj Files---------
+
+Java Compiler Compiler Version 5.0 (Parser Generator)
+(type "javacc" with no arguments for help)
+Reading from file BasicL.jj . . .
+File "TokenMgrError.java" is being rebuilt.
+File "ParseException.java" is being rebuilt.
+File "Token.java" is being rebuilt.
+File "JavaCharStream.java" is being rebuilt.
+Parser generated with 0 errors and 1 warnings.
+
+---------compiling java Files---------
+
+
+---------running test---------
+
+Abstract Syntax Tree:
+ Program
+  Decl
+   Ident_list
+    Id
+   Type
+  ConstDecl
+   Id
+   Type
+   Num
+  Function_Decl
+   Type
+   Id
+   Params
+    Id
+    Type
+   Function_body
+    Decl
+     Ident_list
+      Id
+     Type
+     Ident_list
+      Id
+     Type
+    Condition
+     Id
+     BoolOpp
+     Num
+     BoolOpp
+     Id
+     BoolOpp
+     Num
+    Assign
+     Id
+     Bool
+    Assign
+     Id
+     Num
+    Assign
+     Id
+     Bool
+    Condition
+     Id
+     BoolOpp
+     Id
+     BoolOpp
+     Id
+     BoolOpp
+     Bool
+    Condition
+     Add
+      Id
+      AddOp
+      Mult
+       Mult
+        Id
+        MultOp
+        Id
+       MultOp
+       Id
+     BoolOpp
+     Num
+    Assign
+     Id
+     Bool
+    Assign
+     Id
+     Mult
+      Id
+      MultOp
+      Num
+    Assign
+     Id
+     Add
+      Id
+      AddOp
+      Num
+    Id
+  Main
+   Decl
+    Ident_list
+     Id
+    Type
+    Ident_list
+     Id
+    Type
+   Assign
+    Id
+    Num
+   Assign
+    Id
+    Id
+   Condition
+    Id
+    BoolOpp
+    Id
+   Condition
+    FunctionCall
+     Id
+     Arg_list
+      Id
+   Assign
+    Id
+    Add
+     Id
+     AddOp
+     Num
+   Assign
+    Id
+    Id
+
+
+------Symantic Analysis------
+
+--------Symbol Table---------
+
+Scope: Program
+	ID: result| DataType: Var| Type: int| Values: {}
+	ID: N| DataType: Const| Type: int| Values: {fragment=100}
+	ID: is_prime| DataType: Function| Type: bool| Values: {}
+Scope: Main
+	ID: i| DataType: Var| Type: int| Values: {}
+	ID: sum| DataType: Var| Type: int| Values: {}
+Scope: is_prime
+	ID: res| DataType: Var| Type: bool| Values: {}
+	ID: x| DataType: ParamVar| Type: int| Values: {}
+	ID: i| DataType: Var| Type: int| Values: {}
+
+-------IR 3-address code-------
+
+L1
+[ = , 100 ,  , N ]
+L2
+[ = , true ,  , res ]
+[ = , 2 ,  , i ]
+[ = , true ,  , res ]
+[ / , x , i , t3 ]
+[ * , t3 , i , t2 ]
+[ - , x , t2 , t1 ]
+[ = , false ,  , res ]
+[ * , i , 1 , t4 ]
+[ = , t4 ,  , i ]
+[ + , i , 1 , t5 ]
+[ = , t5 ,  , i ]
+[ return ,  ,  ,  ]
+L3
+[ = , 0 ,  , sum ]
+[ = , sum ,  , i ]
+[ param1 , i ,  ,  ]
+[ call , is_prime , param1 ,  ]
+[ goto ,  ,  , L2 ]
+[ + , sum , 1 , t6 ]
+[ = , t6 ,  , sum ]
+[ = , sum ,  , result ]
