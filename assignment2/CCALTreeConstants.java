@@ -5,24 +5,24 @@ public interface CCALTreeConstants
   public int JJTVOID = 1;
   public int JJTVAR_DECL = 2;
   public int JJTCONST_DECL = 3;
-  public int JJTFUNCTION = 4;
-  public int JJTTYPE = 5;
-  public int JJTPARAM = 6;
-  public int JJTMAIN = 7;
-  public int JJTSTATEMENT = 8;
-  public int JJTIFCOND = 9;
-  public int JJTWHILECOND = 10;
-  public int JJTASSIGNMENT = 11;
-  public int JJTMATH_OP = 12;
-  public int JJTADDOPERATION = 13;
-  public int JJTSUBOPERATION = 14;
-  public int JJTFRAGMENT = 15;
+  public int JJTFUNCTIONLIST = 4;
+  public int JJTFUNC_DECL = 5;
+  public int JJTFUNC_BODY = 6;
+  public int JJTTYPE = 7;
+  public int JJTPARAMLIST = 8;
+  public int JJTMAIN = 9;
+  public int JJTIFCOND = 10;
+  public int JJTWHILECOND = 11;
+  public int JJTASSIGNMENT = 12;
+  public int JJTFUNCTIONCALL = 13;
+  public int JJTADDOPERATION = 14;
+  public int JJTSUBOPERATION = 15;
   public int JJTID = 16;
   public int JJTNUMBER = 17;
   public int JJTBOOLEAN = 18;
   public int JJTLOGIC_OP = 19;
   public int JJTCOMPARE_OP = 20;
-  public int JJTARG = 21;
+  public int JJTARGLIST = 21;
 
 
   public String[] jjtNodeName = {
@@ -30,24 +30,24 @@ public interface CCALTreeConstants
     "void",
     "Var_decl",
     "Const_decl",
-    "Function",
+    "FunctionList",
+    "Func_decl",
+    "Func_body",
     "Type",
-    "Param",
+    "ParamList",
     "Main",
-    "Statement",
     "IfCond",
     "WhileCond",
     "Assignment",
-    "Math_Op",
+    "FunctionCall",
     "AddOperation",
     "SubOperation",
-    "Fragment",
     "Id",
     "Number",
     "Boolean",
     "Logic_Op",
     "Compare_Op",
-    "Arg",
+    "ArgList",
   };
 }
-/* JavaCC - OriginalChecksum=169656a86cfd388ba4e7f6c87eccb683 (do not edit this line) */
+/* JavaCC - OriginalChecksum=6d20af1c557dc8a225a65fc4efa137d0 (do not edit this line) */

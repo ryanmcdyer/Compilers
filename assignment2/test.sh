@@ -2,6 +2,6 @@
 FILES="../CCAL/*"
 for f in $FILES
 do
-  echo "$f"
+  echo "File name: $f"
   java CCAL $f
 done

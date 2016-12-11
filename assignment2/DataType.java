@@ -2,8 +2,8 @@ public enum DataType
 {
   SimpleNode,
   Program,
-  VariableDecl,
-  ConstantDecl,
+  Variable,
+  Constant,
   Function,
   ParamList,
   Main,

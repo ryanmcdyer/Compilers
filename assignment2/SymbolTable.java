@@ -37,7 +37,7 @@ public class SymbolTable {
 		return id;
 	}
 
-	void setIdentifer(Token id) {
+	void setID(Token id) {
 		this.id = id;
 	}
 

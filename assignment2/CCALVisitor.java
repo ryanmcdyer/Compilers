@@ -5,23 +5,23 @@ public interface CCALVisitor
   public Object visit(ASTProgram node, Object data);
   public Object visit(ASTVar_decl node, Object data);
   public Object visit(ASTConst_decl node, Object data);
-  public Object visit(ASTFunction node, Object data);
+  public Object visit(ASTFunctionList node, Object data);
+  public Object visit(ASTFunc_decl node, Object data);
+  public Object visit(ASTFunc_body node, Object data);
   public Object visit(ASTType node, Object data);
-  public Object visit(ASTParam node, Object data);
+  public Object visit(ASTParamList node, Object data);
   public Object visit(ASTMain node, Object data);
-  public Object visit(ASTStatement node, Object data);
   public Object visit(ASTIfCond node, Object data);
   public Object visit(ASTWhileCond node, Object data);
   public Object visit(ASTAssignment node, Object data);
-  public Object visit(ASTMath_Op node, Object data);
+  public Object visit(ASTFunctionCall node, Object data);
   public Object visit(ASTAddOperation node, Object data);
   public Object visit(ASTSubOperation node, Object data);
-  public Object visit(ASTFragment node, Object data);
   public Object visit(ASTId node, Object data);
   public Object visit(ASTNumber node, Object data);
   public Object visit(ASTBoolean node, Object data);
   public Object visit(ASTLogic_Op node, Object data);
   public Object visit(ASTCompare_Op node, Object data);
-  public Object visit(ASTArg node, Object data);
+  public Object visit(ASTArgList node, Object data);
 }
-/* JavaCC - OriginalChecksum=ab14c2d692b18ca8646e07c78340bcb6 (do not edit this line) */
+/* JavaCC - OriginalChecksum=a5a50b686c10d129ac39204450223649 (do not edit this line) */
