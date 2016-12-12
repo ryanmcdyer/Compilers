@@ -21,8 +21,6 @@ public class CCAL/*@bgen(jjtree)*/implements CCALTreeConstants/*@egen*/ {/*@bgen
 
 /*@egen*/
 
-  public static Hashtable ST = new Hashtable();
-
   public static void main(String args[]) throws ParseException {
 
     CCAL parser;
@@ -44,16 +42,10 @@ public class CCAL/*@bgen(jjtree)*/implements CCALTreeConstants/*@egen*/ {/*@bgen
 				SCVisitor visitor = new SCVisitor();
         root.jjtAccept(visitor, null);
 
-/*
-        System.out.println();
-        System.out.println("Program:");
-        PrintVisitor pv = new PrintVisitor();
-        root.jjtAccept(pv, null);
-
-        System.out.println();
-        System.out.println("Type Checking:");
-        TypeCheckVisitor tc = new TypeCheckVisitor();
-        root.jjtAccept(tc, ST);    */
+        /*  System.out.println();
+          System.out.println("Intermediate Rep:");
+          IRVisitor ir = new IRVisitor();
+          root.jjtAccept(ir, ST);*/
 
       } catch (java.io.FileNotFoundException e) {
         System.err.println("File " + args[0] + " not found.");
@@ -61,7 +53,7 @@ public class CCAL/*@bgen(jjtree)*/implements CCALTreeConstants/*@egen*/ {/*@bgen
       }
     } else {
       System.out.println("Usage is one of:");
-      System.out.println(" java CCAL");
+      System.out.println(" java CCAL ");
       System.out.println("OR");
       System.out.println(" java CCAL inputfile");
       return;

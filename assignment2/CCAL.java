@@ -4,8 +4,6 @@ import java.io.*;
 
 public class CCAL/*@bgen(jjtree)*/implements CCALTreeConstants, CCALConstants {/*@bgen(jjtree)*/
   protected static JJTCCALState jjtree = new JJTCCALState();
-  public static Hashtable ST = new Hashtable();
-
   public static void main(String args[]) throws ParseException {
 
     CCAL parser;
@@ -27,16 +25,10 @@ public class CCAL/*@bgen(jjtree)*/implements CCALTreeConstants, CCALConstants {/
                                 SCVisitor visitor = new SCVisitor();
         root.jjtAccept(visitor, null);
 
-/*
-        System.out.println();
-        System.out.println("Program:");
-        PrintVisitor pv = new PrintVisitor();
-        root.jjtAccept(pv, null);
-
-        System.out.println();
-        System.out.println("Type Checking:");
-        TypeCheckVisitor tc = new TypeCheckVisitor();
-        root.jjtAccept(tc, ST);    */
+        /*  System.out.println();
+          System.out.println("Intermediate Rep:");
+          IRVisitor ir = new IRVisitor();
+          root.jjtAccept(ir, ST);*/
 
       } catch (java.io.FileNotFoundException e) {
         System.err.println("File " + args[0] + " not found.");
@@ -44,7 +36,7 @@ public class CCAL/*@bgen(jjtree)*/implements CCALTreeConstants, CCALConstants {/
       }
     } else {
       System.out.println("Usage is one of:");
-      System.out.println(" java CCAL");
+      System.out.println(" java CCAL ");
       System.out.println("OR");
       System.out.println(" java CCAL inputfile");
       return;
@@ -1008,6 +1000,26 @@ void nemp_parameter_list() #Param : {}//(10)
     finally { jj_save(3, xla); }
   }
 
+  static private boolean jj_3R_39() {
+    if (jj_scan_token(PLUS_SIGN)) return true;
+    return false;
+  }
+
+  static private boolean jj_3R_36() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_39()) {
+    jj_scanpos = xsp;
+    if (jj_3R_40()) return true;
+    }
+    return false;
+  }
+
+  static private boolean jj_3R_33() {
+    if (jj_3R_36()) return true;
+    return false;
+  }
+
   static private boolean jj_3R_20() {
     if (jj_scan_token(LPAREN)) return true;
     if (jj_3R_17()) return true;
@@ -1261,26 +1273,6 @@ void nemp_parameter_list() #Param : {}//(10)
 
   static private boolean jj_3R_28() {
     if (jj_3R_33()) return true;
-    return false;
-  }
-
-  static private boolean jj_3R_39() {
-    if (jj_scan_token(PLUS_SIGN)) return true;
-    return false;
-  }
-
-  static private boolean jj_3R_36() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_39()) {
-    jj_scanpos = xsp;
-    if (jj_3R_40()) return true;
-    }
-    return false;
-  }
-
-  static private boolean jj_3R_33() {
-    if (jj_3R_36()) return true;
     return false;
   }
 
